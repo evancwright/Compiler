@@ -39,6 +39,13 @@ namespace XMLto6809
         {
             public string name;
             public string initialVal;
+
+            public UserVar(string name, string value) 
+            {
+                this.name = name;
+                this.initialVal = value;
+            }
+
         }
 
         // string testRoutine = "if (GUARD HUT.holder==5) { print(\"You have the lamp\"); if (WHITE CUBE.description!=1) { print (\"It's open.\"); FLASHLIGHT.holder=offscreen;} }";
@@ -818,8 +825,10 @@ namespace XMLto6809
             foreach (XmlNode n in subs)
             {
                 string name = n.Attributes.GetNamedItem("name").Value;
-                string addr = n.Attributes.GetNamedItem("address").Value;
-                varTable[name] = addr;
+                string val = n.Attributes.GetNamedItem("value").Value;
+                varTable[name] = name;
+
+                userVars.Add(new UserVar(name, val));
             }
         }
 
