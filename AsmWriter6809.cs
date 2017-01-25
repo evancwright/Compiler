@@ -76,7 +76,7 @@ namespace XMLto6809
             UNUSED_MASK equ 128
             */
             propBytes.Add("portable", "PROPERTY_BYTE_2");
-            propBytes.Add("edible", "PROPERTY_BYTE_2");
+            propBytes.Add("backdrop", "PROPERTY_BYTE_2");
             propBytes.Add("flammable", "PROPERTY_BYTE_2");
             propBytes.Add("lightable", "PROPERTY_BYTE_2");
             propBytes.Add("lit", "PROPERTY_BYTE_2");
@@ -150,36 +150,40 @@ namespace XMLto6809
 
                 string right = code.Substring(code.IndexOf(op));
                 string left = code.Substring(1, code.IndexOf(".") - 1);
+
                 //    string attr = code.Substring(code.IndexOf("."), code.IndexOf(op) - code.IndexOf(op));
                 right = right.Substring(2, right.IndexOf(")") - 2);
                 string val = right;
                 int valId = XmlTo6809.GetInstance().GetObjectId(val);
 
                 left = left.Trim();
-                int objId = -1;
-                if (left != "$dobj" && left != "iobj")
+//                int objId = -1;
+ //               if (left != "$dobj" && left != "iobj")
+ //               {
+ //                  objId = XmlTo6809.GetInstance().GetObjectId(left); ;
+ //               } 
+
+                //is there a "."  on the left
+                if (left.IndexOf(".") == -1)
                 {
-                   objId = XmlTo6809.GetInstance().GetObjectId(left.Trim()); ;
-                } 
+                    string attrName = code.Substring(code.IndexOf(".") + 1, code.IndexOf(op) - code.IndexOf(".") - 1);
 
-                //is there a .? if not, the 
-                string attrName = code.Substring(code.IndexOf(".") + 1, code.IndexOf(op) - code.IndexOf(".") - 1);
-
-                attrName = attrName.Trim().ToLower();
-                int value;
-                if (attrIndexes.TryGetValue(attrName, out value))
-                {//test attr
-                    int attrNum = value;
-                    WriteAttrTest(code, objId, left.Trim(), attrName, attrNum, op, valId, label, sw);
+                    attrName = attrName.Trim().ToLower();
+                    int value;
+                    if (attrIndexes.TryGetValue(attrName, out value))
+                    {//test attr
+                        int attrNum = value;
+    //                    WriteAttrTest(code, objId, left.Trim(), attrName, attrNum, op, valId, label, sw);
+                        WriteAttrTest(code, left.Trim(), attrName, attrNum, op, right, label, sw);
+                    }
+                    else if (IsProperty(attrName))
+                    {//test property
+                        WritePropTest(code, left.Trim(), attrName, op, valId, label, sw);
+                    }
                 }
-                else if (IsProperty(attrName))
-                {//test property
-
-                    WritePropTest(code, objId, left.Trim(), attrName, op, valId, label, sw);
-                }
-                else if (IsVar(code))
-                {//var test
-                    int x = 5;
+                else if (IsVar(left))
+                {//not dot, it's a var test
+                    WriteVarTest(code, left, op, right, label, sw);
                 }
             }
             catch (Exception e)
@@ -189,18 +193,13 @@ namespace XMLto6809
         }
 
 
-        private void WriteAttrTest(string code, int objId, string objName, string attrName, int attrNum, string op, int val, string label, StreamWriter sw)
+        private void WriteAttrTest(string code, string objName, string attrName, int attrNum, string op, string val, string label, StreamWriter sw)
         {
             sw.WriteLine("\tnop ; test (" + code + ")");
-            sw.WriteLine("\tlda #" + val);
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(val) + " ;" + val);
             sw.WriteLine("\tpshs a    ; push right side");
 
-            if (objName.Equals("$dobj"))
-                sw.WriteLine("\tlda sentence+1 ; direct obj");
-            else if (objName.Equals("$iobj"))
-                sw.WriteLine("\tlda sentence+3 ; indirect obj");
-            else       
-                sw.WriteLine("\tlda #" + objId + " ; " + objName);
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(objName) + " ; " + objName);
             sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
             sw.WriteLine("\tmul");
             sw.WriteLine("\ttfr d,x");
@@ -216,18 +215,13 @@ namespace XMLto6809
         }
 
 
-        private void WritePropTest(string code, int objId, string objName, string propName, string op, int val, string label, StreamWriter sw)
+        private void WritePropTest(string code, string objName, string propName, string op, int val, string label, StreamWriter sw)
         {
 
             sw.WriteLine("\tnop ; test (" + code + ")");
             sw.WriteLine("\tlda #" + val);
             sw.WriteLine("\tpshs a    ; push right side");
-            if (objName.Equals("$dobj"))
-                 sw.WriteLine("\tlda sentence+1 ; direct obj");
-            else if (objName.Equals("$iobj"))
-                 sw.WriteLine("\tlda sentence+3 ; indirect obj");
-            else
-                sw.WriteLine("\tlda #" + objId);
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(objName));
             sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
             sw.WriteLine("\tmul");
             sw.WriteLine("\ttfr d,x");
@@ -252,13 +246,28 @@ namespace XMLto6809
             sw.WriteLine("\t" + GetOpCode(op) + " @" + label);
         }
 
+        private void WriteVarTest(string code, string varName, string op, string val, string label, StreamWriter sw)
+        {
+            sw.WriteLine("\tnop ; test (" + code + ")");
+            sw.WriteLine("\tlda #" + ToRegisterLoadOperand(varName) + " ; " + varName);
+            sw.WriteLine("\tpshs a    ; push right left");
+            sw.WriteLine("\tlda #" + ToRegisterLoadOperand(val) + " ; " + varName);
+             
+            sw.WriteLine("\tcmpa ,s ; compare to right side");
+            sw.WriteLine("\tpshu cc ; save flags");
+            sw.WriteLine("\tleas 1,s ; pop right side");
+            sw.WriteLine("\tpulu cc ; restore flags");
+            sw.WriteLine("\t" + GetOpCode(op) + " @" + label);
+        }
+
         public void WriteCode(string code, StreamWriter sw)
         {
-            //does it start with an 'if' statement
+
             code = code.Trim();
             if (code.Length > 0 && code != "}")
             {
-//                int type = GetBlockType(code);
+
+                //does it start with an 'if' statement
 
                 if (code.IndexOf("if")==0 )
                 {
@@ -336,6 +345,10 @@ namespace XMLto6809
                     else if (statement.IndexOf("move()") != -1)
                     {
                         WriteMoveStatement(sw);
+                    }
+                    else if (statement.IndexOf("add(") != -1)
+                    {
+                        WriteAddVar(statement, sw);
                     }
                     else if (XmlTo6809.GetInstance().IsSubroutine(statement))
                     {
@@ -604,30 +617,59 @@ namespace XMLto6809
         private string ToRegisterLoadOperand(string tok)
         {
             int result;
-            if (tok.Equals("$dobj"))
+            if (XmlTo6809.GetInstance().IsVar(tok))
             {
-                return "sentence+1";
-            }
-            else if (tok.Equals("$iobj"))
-            {
-                return "sentence+3";
+                return XmlTo6809.GetInstance().GetVarAddr(tok);
             }
             else if (tok.IndexOf("\"") == 0)
             {
                 string left = tok.Substring(1);
                 string str = left.Substring(0, left.IndexOf("\"") - 1);
-                return XmlTo6809.GetInstance().GetStringId(str).ToString();
+                return "#" + XmlTo6809.GetInstance().GetStringId(str).ToString();
             }
             else if (XmlTo6809.GetInstance().GetObjectId(tok) != -1)
             {
-                return XmlTo6809.GetInstance().GetObjectId(tok).ToString();
+                return "#"+XmlTo6809.GetInstance().GetObjectId(tok).ToString();
             }
             else if (Int32.TryParse(tok, out result))
             {
-                return result.ToString();
+                return "#" + result.ToString();
             }
             else throw new Exception("Unable to evaluate: " + tok);
 
+        }
+
+        private void WriteSetVar(string code, StreamWriter sw)
+        {
+            string trimmed = code.Substring(code.IndexOf(")")-1);
+            int commaIx = trimmed.IndexOf(',') ;
+            string varName = trimmed.Substring(commaIx - 1).Trim();
+            string val = trimmed.Substring(commaIx, trimmed.Length - commaIx );
+            
+            //write the code to set the var
+            sw.WriteLine("\tpshs a");
+            sw.WriteLine("\tlda #" + val + " ; load new val");
+            sw.WriteLine("\tsta " +  varName +  " ; store it back");
+            sw.WriteLine("\tpuls a");
+        }
+
+        private void WriteAddVar(string code, StreamWriter sw)
+        {
+            string trimmed = code.Substring(code.IndexOf("(")+1);
+            trimmed = trimmed.Substring(0, trimmed.IndexOf(")") );
+            int commaIx = trimmed.IndexOf(',');
+            string varName = trimmed.Substring(0,commaIx).Trim();
+            string val = trimmed.Substring(commaIx+1);
+
+            //write the code to set the var
+            sw.WriteLine("\tpshs a");
+            sw.WriteLine("\tlda " + varName);
+            sw.WriteLine("\tpshu a ; push var value");
+            sw.WriteLine("\tlda #" + val + " ; push val to add");
+            sw.WriteLine("\tadda ,u ; add it ");
+            sw.WriteLine("\tsta " + varName + " ; store it back");
+            sw.WriteLine("\tpulu a ; remove temp");
+            sw.WriteLine("\tpuls a");
         }
 
         private bool IsAttribute(string attr)

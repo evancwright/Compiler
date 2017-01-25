@@ -11,20 +11,25 @@ namespace XMLto6809
     {
         public const int NUM_ATTRIBS = 13;
         public const int NUM_PROPERTIES = 16;
+        public const int NUM_BACKDROP_ROOMS = 5;
         private int _id;
         private string _name;
         private string _initial_desc;
         private string _desc ;
         private int _holder;
+        private bool _isBackdrop = false;
+
         Dictionary<string,bool> flagsMap = new Dictionary<string,bool>();
         Dictionary<string, string> nogoMap = new Dictionary<string, string>(); 
         public int[] properties = new int[NUM_PROPERTIES];
         public int[] attribs = new int[NUM_ATTRIBS];
+        public int[] backdropRooms = new int[NUM_BACKDROP_ROOMS];
+
         public static string[] attribNames = { "n", "s", "e", "w", "ne", "se", "sw", "nw", "up", "down", "in", "out", "mass"};  //12
 
         public static string[] xmlFlagNames = { "scenery", "supporter", "container", "transparent",
                                "openable", "open", "lockable", "locked",
-                               "portable", "edible", "drinkable", "flammable",
+                               "portable", "backdrop", "drinkable", "flammable",
                                "lightable", "emittinglight", "door", "unused"};
         
         public string name {
@@ -36,6 +41,7 @@ namespace XMLto6809
         public string initialdescription { get { return _initial_desc; } } 
         public string description { get { return _desc; } }
         public List<string> synonyms = new List<String>();
+        public bool IsBackdrop() { return _isBackdrop;  }
 
         public GameObject(XmlNode data)
         {
@@ -45,13 +51,36 @@ namespace XMLto6809
             _initial_desc = data.SelectSingleNode("initialdescription").InnerText;
             _holder = Convert.ToInt32(data.Attributes.GetNamedItem("holder").Value);
 
+            for (int i = 0; i < NUM_BACKDROP_ROOMS; i++ )
+            {
+                backdropRooms[i] = 255;       
+            }
+
+
+            LoadBackdrop(data);
             LoadAttribs(data);
             LoadFlags(data);
             LoadNogoMsgs(data);
             LoadSynonyms(data);
+
         }
 
+        private void LoadBackdrop(XmlNode data)
+        {
+            XmlNode bd = data.SelectSingleNode("backdrop");
+            if (bd != null)
+            {
+                _isBackdrop = true;
+                properties[9]=1;
+                string roomStr = bd.Attributes["rooms"].Value;
+                string[] rooms = roomStr.Split(',');
 
+                for (int i = 0; i < rooms.Length; i++)
+                {
+                    backdropRooms[i] = Convert.ToInt32(rooms[i].Trim());
+                }
+            }
+        }
 
         private void LoadSynonyms(XmlNode data)
         {

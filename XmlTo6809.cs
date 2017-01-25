@@ -30,7 +30,7 @@ namespace XMLto6809
 
         static string[] asmFlagNames =   { "SCENERY_MASK", "SUPPORTER_MASK", "CONTAINER_MASK", "TRANSPARENT_MASK",
                                "OPENABLE_MASK","OPEN_MASK", "LOCKABLE_MASK", "LOCKED_MASK", 
-                               "PORTABLE_MASK", "EDIBLE_MASK", "DRINKABLE_MASK", "FLAMMABLE_MASK", 
+                               "PORTABLE_MASK", "BACKDROP_MASK", "DRINKABLE_MASK", "FLAMMABLE_MASK", 
                                "LIGHTABLE_MASK", "EMITTING_LIGHT_MASK","DOOR_MASK", "UNUSED_MASK" 
                            };
 
@@ -60,6 +60,7 @@ namespace XMLto6809
         	"ON",
             "OFF",
             "INTO",
+            "UP",
             "WITH"
         };
 
@@ -107,7 +108,7 @@ namespace XMLto6809
             WriteSentenceTable("after");
             WriteEvents(doc);
             WriteUserVarTable(doc);
-
+            WriteBackdropTable(doc);
         }
 
 
@@ -709,6 +710,9 @@ namespace XMLto6809
             }
         }
 
+
+
+
         //writes out the check rules
         private void WriteCheckTable(string fileName)
         {
@@ -740,7 +744,6 @@ namespace XMLto6809
         {
             using (StreamWriter sw = File.CreateText("Welcome6809.asm"))
             {
-
                 sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
                 sw.WriteLine("; welcome message include file");
                 sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
@@ -776,6 +779,10 @@ namespace XMLto6809
             return -1;
         }
 
+        public bool IsVar(string s)
+        {
+            return varTable.Keys.Contains(s);
+        }
 
         int GetObjId(string oname)
         {
@@ -849,6 +856,36 @@ namespace XMLto6809
 
             }
              
+        }
+
+        private void WriteBackdropTable(XmlDocument doc)
+        {
+            using (StreamWriter sw = File.CreateText("BackDropTable6809.asm"))
+            {
+
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("; Machine Generated Backdrop Table ");
+                sw.WriteLine("; Format: id, followed by 5 rooms where that object is visible (or 255)");
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("");
+                sw.WriteLine("backdrop_table");
+                for (int i=0; i < objects.Count; i++)
+                {
+                    GameObject o = objects[i];
+
+                    if (o.IsBackdrop())
+                    {
+                        sw.Write("\t.db " + o.id );
+
+                        for (int j=0; j < o.backdropRooms.Length; j++)
+                        {
+                            sw.Write("," + o.backdropRooms[j]);
+                        }
+                        sw.WriteLine(" ; " + o.name);
+                    }
+                }
+                sw.WriteLine("\t.db 255");
+            }
         }
 
         public string GetVarAddr(string varName)
