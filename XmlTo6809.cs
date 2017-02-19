@@ -817,21 +817,23 @@ namespace XMLto6809
 
         void PopulateVariableTable(XmlDocument doc)
         {
-            XmlNodeList subs = doc.SelectNodes("//project/vars/builtin");
+            XmlNodeList vars = doc.SelectNodes("//project/variables/builtin/var");
 
-            foreach (XmlNode n in subs)
+            foreach (XmlNode n in vars)
             {
                 string name = n.Attributes.GetNamedItem("name").Value;
-                string addr = n.Attributes.GetNamedItem("address").Value;
+                string addr = n.Attributes.GetNamedItem("addr").Value;
+                string val = n.Attributes.GetNamedItem("value").Value;
                 varTable[name] = addr;
             }
 
 
-            subs = doc.SelectNodes("//project/vars/user");
+            vars = doc.SelectNodes("//project/variables/user/var");
 
-            foreach (XmlNode n in subs)
+            foreach (XmlNode n in vars)
             {
                 string name = n.Attributes.GetNamedItem("name").Value;
+                string addr = n.Attributes.GetNamedItem("addr").Value;
                 string val = n.Attributes.GetNamedItem("value").Value;
                 varTable[name] = name;
 
@@ -851,7 +853,7 @@ namespace XMLto6809
 
                 foreach (UserVar v in userVars)
                 {
-                    sw.WriteLine(v.name + ".db " + v.initialVal);
+                    sw.WriteLine(v.name + "\t.db " + v.initialVal);
                 }
 
             }

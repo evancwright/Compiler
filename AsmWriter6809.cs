@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-
+ 
 namespace XMLto6809
 {
     class AsmWriter6809
@@ -132,7 +132,9 @@ namespace XMLto6809
             sw.WriteLine("; machine generate routine from XML file");
             sw.WriteLine(name);
             sw.WriteLine("\tpshs d,x,y");
-            code = code.Replace("\r\n","");
+            code = code.Replace("\r","");
+            code = code.Replace("\n", "");
+            code = code.Replace("\t", "");
             WriteCode(code, sw);
             sw.WriteLine("\tpuls y,x,d");
             sw.WriteLine("\trts");
@@ -148,15 +150,9 @@ namespace XMLto6809
             {
                 string op = GetOperator(code);
 
-                string right = code.Substring(code.IndexOf(op));
-                string left = code.Substring(1, code.IndexOf(".") - 1);
-
-                //    string attr = code.Substring(code.IndexOf("."), code.IndexOf(op) - code.IndexOf(op));
-                right = right.Substring(2, right.IndexOf(")") - 2);
-                string val = right;
-                int valId = XmlTo6809.GetInstance().GetObjectId(val);
-
-                left = left.Trim();
+                string right = code.Substring(code.IndexOf(op)).Trim();
+                string left = code.Substring(1, code.IndexOf(op)-1).Trim();
+                
 //                int objId = -1;
  //               if (left != "$dobj" && left != "iobj")
  //               {
@@ -164,8 +160,17 @@ namespace XMLto6809
  //               } 
 
                 //is there a "."  on the left
-                if (left.IndexOf(".") == -1)
+                if (left.IndexOf(".") != -1)
                 {
+                    left = code.Substring(1, code.IndexOf(".") - 1);
+
+                    //    string attr = code.Substring(code.IndexOf("."), code.IndexOf(op) - code.IndexOf(op));
+                    right = right.Substring(2, right.IndexOf(")") - 2);
+                    string val = right;
+                    int valId = XmlTo6809.GetInstance().GetObjectId(val);
+
+                    left = left.Trim();
+
                     string attrName = code.Substring(code.IndexOf(".") + 1, code.IndexOf(op) - code.IndexOf(".") - 1);
 
                     attrName = attrName.Trim().ToLower();
@@ -183,7 +188,13 @@ namespace XMLto6809
                 }
                 else if (IsVar(left))
                 {//not dot, it's a var test
+                    right = right.Substring(op.Length).Trim();
+                    right = right.Substring(0, right.Length - 1);
                     WriteVarTest(code, left, op, right, label, sw);
+                }
+                else
+                {
+                    throw new  Exception("unknown variable: " + left);
                 }
             }
             catch (Exception e)
@@ -249,9 +260,9 @@ namespace XMLto6809
         private void WriteVarTest(string code, string varName, string op, string val, string label, StreamWriter sw)
         {
             sw.WriteLine("\tnop ; test (" + code + ")");
-            sw.WriteLine("\tlda #" + ToRegisterLoadOperand(varName) + " ; " + varName);
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(varName) + " ; " + varName);
             sw.WriteLine("\tpshs a    ; push right left");
-            sw.WriteLine("\tlda #" + ToRegisterLoadOperand(val) + " ; " + varName);
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(val) + " ; " + val);
              
             sw.WriteLine("\tcmpa ,s ; compare to right side");
             sw.WriteLine("\tpshu cc ; save flags");
@@ -306,6 +317,7 @@ namespace XMLto6809
                 {
                  
                     code = code.Substring(4); //strip off 'else'
+                    code = UnWrapCurlyBraces(code);
                     WriteCode(code, sw);
 
                     string l = labelStack[labelStack.Count - 1];
@@ -349,6 +361,10 @@ namespace XMLto6809
                     else if (statement.IndexOf("add(") != -1)
                     {
                         WriteAddVar(statement, sw);
+                    }
+                    else if (statement.IndexOf("set(") != -1)
+                    {
+                        WriteSetVar(statement, sw);
                     }
                     else if (XmlTo6809.GetInstance().IsSubroutine(statement))
                     {
@@ -398,7 +414,7 @@ namespace XMLto6809
                     }//end attr or prop assignment (dot found)
                      
 
-                    string remainder = code.Substring(code.IndexOf(";")+1);
+                    string remainder = code.Substring(code.IndexOf(";")+1).Trim();
                     WriteCode(remainder, sw);
                 }
             }
@@ -585,7 +601,7 @@ namespace XMLto6809
             }
             else 
             {
-                return false;
+                return XmlTo6809.GetInstance().IsVar(name);
             }
         }
 
@@ -617,7 +633,11 @@ namespace XMLto6809
         private string ToRegisterLoadOperand(string tok)
         {
             int result;
-            if (XmlTo6809.GetInstance().IsVar(tok))
+            if (Int32.TryParse(tok, out result))
+            {
+                return "#" + result.ToString();
+            } 
+            else if (XmlTo6809.GetInstance().IsVar(tok))
             {
                 return XmlTo6809.GetInstance().GetVarAddr(tok);
             }
@@ -631,20 +651,18 @@ namespace XMLto6809
             {
                 return "#"+XmlTo6809.GetInstance().GetObjectId(tok).ToString();
             }
-            else if (Int32.TryParse(tok, out result))
-            {
-                return "#" + result.ToString();
-            }
+            
             else throw new Exception("Unable to evaluate: " + tok);
 
         }
 
         private void WriteSetVar(string code, StreamWriter sw)
         {
-            string trimmed = code.Substring(code.IndexOf(")")-1);
+            string trimmed = code.Substring(code.IndexOf("(")+1);
+            trimmed = trimmed.Substring(0, trimmed.Length - 1);
             int commaIx = trimmed.IndexOf(',') ;
-            string varName = trimmed.Substring(commaIx - 1).Trim();
-            string val = trimmed.Substring(commaIx, trimmed.Length - commaIx );
+            string varName = trimmed.Substring(0,commaIx).Trim();
+            string val = trimmed.Substring(commaIx+1, trimmed.Length - commaIx-1 );
             
             //write the code to set the var
             sw.WriteLine("\tpshs a");
@@ -670,6 +688,36 @@ namespace XMLto6809
             sw.WriteLine("\tsta " + varName + " ; store it back");
             sw.WriteLine("\tpulu a ; remove temp");
             sw.WriteLine("\tpuls a");
+        }
+        /*
+        private void WriteSetVar(string code, StreamWriter sw)
+        {
+            string trimmed = code.Substring(code.IndexOf("(") + 1);
+            trimmed = trimmed.Substring(0, trimmed.IndexOf(")"));
+            int commaIx = trimmed.IndexOf(',');
+            string varName = trimmed.Substring(0, commaIx).Trim();
+            string val = trimmed.Substring(commaIx + 1);
+
+            //write the code to set the var
+            sw.WriteLine("\tpshs a");
+            sw.WriteLine("\tlda " + varName);
+            sw.WriteLine("\tpshu a ; push var value");
+            sw.WriteLine("\tlda #" + val + " ; load val to set var to");
+            sw.WriteLine("\tsta " + varName + " ; store it");
+            sw.WriteLine("\tpuls a");
+        }
+         */ 
+
+        string UnWrapCurlyBraces(string code)
+        {
+            if (code[0] == '{')
+            {
+                int end = code.LastIndexOf("}");
+                int start = code.IndexOf("{");
+                string unwrapped = code.Substring(start+1, end - start-1);
+                return unwrapped;
+            }
+            else return code;
         }
 
         private bool IsAttribute(string attr)
