@@ -395,22 +395,21 @@ namespace XMLto6809
                         int objId = -1;
                         try
                         {
-                            objId = XmlTo6809.GetInstance().GetObjectId(obj);
+                            objId = project.GetObjectId(obj);
                         } catch  {
                             if (!IsVar(obj))
                             {
                                 throw new Exception("unknown object: " + obj);
                             }
                         }
-                        int valId = -1; 
-
+                      
                         if (IsAttribute(attr))
                         {//attribute
                             
                             int attrNum = attrIndexes[attr.Trim().ToLower()];
 
                             //convert right to an id;
-                            WriteAttrAssignment(objId,obj, attrNum, attr, right, sw);
+                            WriteAttrAssignment(obj+"."+attr, right, sw);
                         }
                         else  
                         {//property assignment
@@ -418,10 +417,11 @@ namespace XMLto6809
                             WritePropAssignment(objId, obj, attr, bit, sw);
                         }
 
-
                     }//end attr or prop assignment (dot found)
-                     
-
+                    else
+                    {//var assignment not using set()
+                        //WriteAttrAssignment(statement, );
+                    }
                     string remainder = code.Substring(code.IndexOf(";")+1).Trim();
                     WriteCode(remainder, sw);
                 }
@@ -452,44 +452,74 @@ namespace XMLto6809
             char c = Convert.ToChar(labelId++);
             return c.ToString().ToLower();
         }
-        /*
-        //write an attribute assignment statement 
-        public void WriteAttrAssignment(int objId, string obj, int attrNum, string attr, int valId, StreamWriter sw)
-        {
-            //top code should put value in a
-            
-            if (obj.Equals("$dobj"))
-                sw.WriteLine("\tlda sentence+1 ; " + obj);
-            else if (obj.Equals("$iobj"))
-                sw.WriteLine("\tlda sentence+3 ; " + obj);
-            else
-                sw.WriteLine("\tlda #" + objId + " ; " + obj);
-         
-
-            //...then compute the address to store it in.
-            sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
-            sw.WriteLine("\tmul");
-            sw.WriteLine("\ttfr d,x");
-            sw.WriteLine("\tleax obj_table,x");
-            sw.WriteLine("\tleax " + attrNum + ",x   ;" + attr);
-            //...then store it
-            sw.WriteLine("\tlda #" + valId);  
-            sw.WriteLine("\tsta ,x");
-        }
-*/
+        
         //example objProp = player.holder
         //example objProp = $dobj
-        public void WriteAttrAssignment(int objId, string obj, int attrNum, string attr, string rhs, StreamWriter sw)
+        public void WriteAttrAssignment(string lhs, string rhs, StreamWriter sw)
+        {
+            //push the value to store
+            PushRHS(rhs, sw);
+            
+            //...then compute the address to store it in.
+            PutLHSAddrInX(lhs, sw);
+
+            //...then store it
+            sw.WriteLine("\tpuls a ; restore rhs");
+            sw.WriteLine("\tsta ,x");
+        }
+
+        //obj must be a var or an attribute, or a litteral
+        void PutLHSAddrInX(string obj, StreamWriter sw)
+        {
+            if (project.IsVar(obj))
+            {
+                sw.WriteLine("\tldx #" + project.GetVarAddr(obj) + " ; " + obj);
+            }
+            else if (obj.IndexOf(".") != -1)
+            {//a property
+                int dot = obj.IndexOf(".");
+                string objName = obj.Substring(0, dot);
+                string attrName = obj.Substring(dot + 1, obj.Length - (dot + 1));
+                int attrNum = attrIndexes[attrName.Trim().ToLower()];
+                int objId = -1;
+                if (project.IsVar(objName))
+                {
+                    sw.WriteLine("\tlda " + project.GetVarAddr(objName) + " ; " + obj);
+                } else {
+                    objId = project.GetObjectId(objName);
+                    sw.WriteLine("\tlda #" + objId + " ; " + obj);
+                }
+                
+                sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
+                sw.WriteLine("\tmul");
+                sw.WriteLine("\ttfr d,x");
+                sw.WriteLine("\tleax obj_table,x");
+                sw.WriteLine("\tleax " + attrNum + ",x   ;" + attrName);
+            }
+            else
+            {//an object
+                int objId = project.GetObjectId(obj);
+
+                sw.WriteLine("\tlda #" + objId + " ; " + obj);
+                sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
+                sw.WriteLine("\tmul");
+                sw.WriteLine("\ttfr d,x");
+                sw.WriteLine("\tleax obj_table,x");
+                 
+            }
+        }
+
+        void PushRHS(string rhs, StreamWriter sw)
         {
             //top code should put value in a
             int val;
-            if (Int32.TryParse(rhs,out val))
+            if (Int32.TryParse(rhs, out val))
             {//int literal
                 sw.WriteLine("\tlda #" + val + " ; " + rhs);
             }
             else if (project.IsVar(rhs))
             {
-                sw.WriteLine("\tlda " + project.GetVarAddr(rhs) + " ; " + obj);
+                sw.WriteLine("\tlda " + project.GetVarAddr(rhs) + " ; " + rhs);
             }
             else if (rhs.IndexOf("\"") == 0)
             {//a string
@@ -503,25 +533,15 @@ namespace XMLto6809
                 WritePutAttrInA(rhs, sw);
             }
             else if (rhs[0].Equals("\""))
-            {//get string id
+            {//get string id?
                 sw.WriteLine("\tlda " + project.GetVarAddr(rhs) + " ; " + rhs);
-            } 
+            }
             else
-            {//and object
+            {//an object?
                 sw.WriteLine("\tlda #" + project.GetObjectId(rhs) + " ; " + rhs);
             }
 
             sw.WriteLine("\tpshs a ; save value to put in attr");
-            //...then compute the address to store it in.
-            sw.WriteLine("\tlda #" + objId + " ; " + obj);
-            sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
-            sw.WriteLine("\tmul");
-            sw.WriteLine("\ttfr d,x");
-            sw.WriteLine("\tleax obj_table,x");
-            sw.WriteLine("\tleax " + attrNum + ",x   ;" + attr);
-            //...then store it
-            sw.WriteLine("\tpuls a ; restore rhs");
-            sw.WriteLine("\tsta ,x");
         }
 
         public void WritePropAssignment(int objId, string obj, string propName, int val, StreamWriter sw)
@@ -759,25 +779,7 @@ namespace XMLto6809
             sw.WriteLine("\tpulu a ; remove temp");
             sw.WriteLine("\tpuls a");
         }
-        /*
-        private void WriteSetVar(string code, StreamWriter sw)
-        {
-            string trimmed = code.Substring(code.IndexOf("(") + 1);
-            trimmed = trimmed.Substring(0, trimmed.IndexOf(")"));
-            int commaIx = trimmed.IndexOf(',');
-            string varName = trimmed.Substring(0, commaIx).Trim();
-            string val = trimmed.Substring(commaIx + 1);
-
-            //write the code to set the var
-            sw.WriteLine("\tpshs a");
-            sw.WriteLine("\tlda " + varName);
-            sw.WriteLine("\tpshu a ; push var value");
-            sw.WriteLine("\tlda #" + val + " ; load val to set var to");
-            sw.WriteLine("\tsta " + varName + " ; store it");
-            sw.WriteLine("\tpuls a");
-        }
-         */ 
-
+ 
         string UnWrapCurlyBraces(string code)
         {
             if (code[0] == '{')
