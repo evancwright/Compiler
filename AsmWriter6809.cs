@@ -21,9 +21,12 @@ namespace XMLto6809
         Dictionary<string, string> propBits = new Dictionary<string, string>(); //bit masks
         
         List<string> labelStack = new List<string>();
- 
+
+        XmlTo6809 project = null;
         public AsmWriter6809()
         {
+            project = XmlTo6809.GetInstance();
+
             attrIndexes.Add("id", 0);
             attrIndexes.Add("holder", 1);
             attrIndexes.Add("initial_description", 2);
@@ -141,6 +144,23 @@ namespace XMLto6809
             sw.WriteLine("");
         }
 
+        //this function write the code to put a variables
+        //attr into register a
+        public void WritePutAttrInA(string expr, StreamWriter sw)
+        {
+            int dot = expr.IndexOf(".");
+            string objName = expr.Substring(0, dot);
+            string attrName = expr.Substring(dot + 1, expr.Length - (dot + 1));
+            int attrNum = attrIndexes[attrName.Trim().ToLower()];
+            sw.WriteLine("nop ; setting up rhs attribute");
+            sw.WriteLine("\tlda " + ToRegisterLoadOperand(objName) + " ; " + objName);
+            sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
+            sw.WriteLine("\tmul");
+            sw.WriteLine("\ttfr d,x");
+            sw.WriteLine("\tleax obj_table,x");
+            sw.WriteLine("\tleax " + attrNum + ",x  ; " + attrName);
+            sw.WriteLine("\tlda ,x");
+        }
          
 
         public void WriteExpr(string code, string label, StreamWriter sw)
@@ -152,12 +172,7 @@ namespace XMLto6809
 
                 string right = code.Substring(code.IndexOf(op)).Trim();
                 string left = code.Substring(1, code.IndexOf(op)-1).Trim();
-                
-//                int objId = -1;
- //               if (left != "$dobj" && left != "iobj")
- //               {
- //                  objId = XmlTo6809.GetInstance().GetObjectId(left); ;
- //               } 
+                 
 
                 //is there a "."  on the left
                 if (left.IndexOf(".") != -1)
@@ -248,7 +263,8 @@ namespace XMLto6809
             //right justify value so it is a 1 or 0
             for (int i = 0; i < pos; i++ )
             {
-                sw.WriteLine("\tasra ; right justify bit" );
+//                sw.WriteLine("\tasra ; right justify bit" );
+                  sw.WriteLine("\tlsra ; right justify bit");
             }
             sw.WriteLine("\tcmpa ,s ; compare to right side");
             sw.WriteLine("\tpshu cc ; save flags");
@@ -288,7 +304,7 @@ namespace XMLto6809
                     int end = code.IndexOf(")");
                     string expr = code.Substring(start, (end - start)+1);
 
-                    WriteExpr(expr, label, sw);
+                     WriteExpr(expr, label, sw);
 
                     //find the matching }
                     string remainder = code.Substring(code.IndexOf("{"));
@@ -376,33 +392,25 @@ namespace XMLto6809
                         string right = statement.Substring(statement.IndexOf("=") + 1, statement.Length - statement.IndexOf("=") - 1).Trim();
                         string attr = statement.Substring(statement.IndexOf(".")+1, statement.IndexOf("=")-statement.IndexOf(".")-1).Trim();
                         string obj = statement.Substring(0,statement.IndexOf("."));
-                        int objId = XmlTo6809.GetInstance().GetObjectId(obj);
+                        int objId = -1;
+                        try
+                        {
+                            objId = XmlTo6809.GetInstance().GetObjectId(obj);
+                        } catch  {
+                            if (!IsVar(obj))
+                            {
+                                throw new Exception("unknown object: " + obj);
+                            }
+                        }
                         int valId = -1; 
 
                         if (IsAttribute(attr))
                         {//attribute
-                            //get the right side of the epression
-                            //is this a string assignment?
-                            int result;
-                            if (right.IndexOf("\"") == 0)
-                            {
-                                string rest = right.Substring(1);
-                                string inside = rest.Substring(0, rest.IndexOf("\""));
-                                valId =  XmlTo6809.GetInstance().GetStringId(inside);
-                            }
-                            else if (Int32.TryParse(right,out result))
-                            {//not an int.  It's an obj.  look up it's ID
-                                valId = result;
-                            }
-                            else
-                            {
-                                valId = XmlTo6809.GetInstance().GetObjectId(right);
-                            }
-
+                            
                             int attrNum = attrIndexes[attr.Trim().ToLower()];
 
                             //convert right to an id;
-                            WriteAttrAssignment(objId,obj, attrNum, attr, valId, sw);
+                            WriteAttrAssignment(objId,obj, attrNum, attr, right, sw);
                         }
                         else  
                         {//property assignment
@@ -444,26 +452,84 @@ namespace XMLto6809
             char c = Convert.ToChar(labelId++);
             return c.ToString().ToLower();
         }
-
+        /*
+        //write an attribute assignment statement 
         public void WriteAttrAssignment(int objId, string obj, int attrNum, string attr, int valId, StreamWriter sw)
         {
+            //top code should put value in a
+            
             if (obj.Equals("$dobj"))
                 sw.WriteLine("\tlda sentence+1 ; " + obj);
             else if (obj.Equals("$iobj"))
                 sw.WriteLine("\tlda sentence+3 ; " + obj);
             else
                 sw.WriteLine("\tlda #" + objId + " ; " + obj);
+         
+
+            //...then compute the address to store it in.
             sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
             sw.WriteLine("\tmul");
             sw.WriteLine("\ttfr d,x");
             sw.WriteLine("\tleax obj_table,x");
             sw.WriteLine("\tleax " + attrNum + ",x   ;" + attr);
-            sw.WriteLine("\tlda #" + valId);
+            //...then store it
+            sw.WriteLine("\tlda #" + valId);  
+            sw.WriteLine("\tsta ,x");
+        }
+*/
+        //example objProp = player.holder
+        //example objProp = $dobj
+        public void WriteAttrAssignment(int objId, string obj, int attrNum, string attr, string rhs, StreamWriter sw)
+        {
+            //top code should put value in a
+            int val;
+            if (Int32.TryParse(rhs,out val))
+            {//int literal
+                sw.WriteLine("\tlda #" + val + " ; " + rhs);
+            }
+            else if (project.IsVar(rhs))
+            {
+                sw.WriteLine("\tlda " + project.GetVarAddr(rhs) + " ; " + obj);
+            }
+            else if (rhs.IndexOf("\"") == 0)
+            {//a string
+                string rest = rhs.Substring(1);
+                string inside = rest.Substring(0, rest.IndexOf("\""));
+                int strId = project.GetStringId(inside);
+                sw.WriteLine("\tlda #" + strId + " ; " + rhs);
+            }
+            else if (rhs.IndexOf(".") != -1)
+            {//an attribute?
+                WritePutAttrInA(rhs, sw);
+            }
+            else if (rhs[0].Equals("\""))
+            {//get string id
+                sw.WriteLine("\tlda " + project.GetVarAddr(rhs) + " ; " + rhs);
+            } 
+            else
+            {//and object
+                sw.WriteLine("\tlda #" + project.GetObjectId(rhs) + " ; " + rhs);
+            }
+
+            sw.WriteLine("\tpshs a ; save value to put in attr");
+            //...then compute the address to store it in.
+            sw.WriteLine("\tlda #" + objId + " ; " + obj);
+            sw.WriteLine("\tldb #OBJ_ENTRY_SIZE");
+            sw.WriteLine("\tmul");
+            sw.WriteLine("\ttfr d,x");
+            sw.WriteLine("\tleax obj_table,x");
+            sw.WriteLine("\tleax " + attrNum + ",x   ;" + attr);
+            //...then store it
+            sw.WriteLine("\tpuls a ; restore rhs");
             sw.WriteLine("\tsta ,x");
         }
 
         public void WritePropAssignment(int objId, string obj, string propName, int val, StreamWriter sw)
         {
+            if (!propBytes.ContainsKey(propName))
+            {
+                throw new Exception("Invalid property:" + propName);
+            }
             string propByte = propBytes[propName];
             sw.WriteLine("\tnop ; set " + obj + "." + propName + "=" + val);
             sw.WriteLine("\tlda #" + objId + " ; " + obj);
@@ -651,7 +717,11 @@ namespace XMLto6809
             {
                 return "#"+XmlTo6809.GetInstance().GetObjectId(tok).ToString();
             }
-            
+            else if (tok.ToUpper().Equals("DOBJ") || tok.ToUpper().Equals("IOBJ"))
+            {
+                string addr =  GetVarAddr(tok);
+                throw new Exception("Not implemted yet!  need to be able to load dobj or iobj : " + tok);
+            }
             else throw new Exception("Unable to evaluate: " + tok);
 
         }
@@ -677,7 +747,7 @@ namespace XMLto6809
             trimmed = trimmed.Substring(0, trimmed.IndexOf(")") );
             int commaIx = trimmed.IndexOf(',');
             string varName = trimmed.Substring(0,commaIx).Trim();
-            string val = trimmed.Substring(commaIx+1);
+            string val = trimmed.Substring(commaIx+1).Trim();
 
             //write the code to set the var
             sw.WriteLine("\tpshs a");

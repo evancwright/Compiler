@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
-
+using System.Windows.Forms;
 
 namespace XMLto6809
 {
@@ -86,7 +86,7 @@ namespace XMLto6809
 
             //get the file path 
             doc.Load(fileName);
-
+            descriptionTable.Clear();
             descriptionTable.AddEntry("YOU NOTICE NOTHING UNEXPECTED.");
             PopulateNameTable(doc);
             PopulateNogoTable(doc);
@@ -115,7 +115,7 @@ namespace XMLto6809
         private void PopulateNogoTable(XmlDocument doc)
         {
             XmlNode list = doc.SelectSingleNode("//project/objects");
-
+            nogoTable.Clear();
             nogoTable.AddEntry("BLANK");
             nogoTable.AddEntry("YOU CAN'T GO THAT WAY.");
 
@@ -127,8 +127,11 @@ namespace XMLto6809
                 {
                     foreach (XmlNode n in msgs.ChildNodes)
                     {
-                        string msg = n.InnerText;
-                        nogoTable.AddEntry(msg);
+                        if (!n.InnerText.Equals(""))
+                        {
+                            string msg = n.InnerText;
+                            nogoTable.AddEntry(msg);
+                        }
                     }
                 }
 
@@ -139,6 +142,9 @@ namespace XMLto6809
         private void PopulateNameTable(XmlDocument doc)
         {
             XmlNodeList list = doc.SelectNodes("//project/objects/object");
+            nameTable.Clear();
+            objects.Clear();
+            descriptionTable.Clear(); 
 
             foreach (XmlNode n in list)
             {
@@ -170,7 +176,10 @@ namespace XMLto6809
 
                 foreach (string s in toks)
                 {
-                    dict.AddEntry(s);
+                    if (s!=null && !s.Equals(""))
+                    {
+                        dict.AddEntry(s);
+                    }
                 }
 
                 //create the object from the data
@@ -179,7 +188,8 @@ namespace XMLto6809
 
                 foreach (string s in gobj.synonyms)
                 {
-                    dict.AddEntry(s);
+                    if (!s.Equals(""))
+                        dict.AddEntry(s);
                 }
 
             }
@@ -189,6 +199,8 @@ namespace XMLto6809
 
         private void PopulateVerbTable(XmlNode doc)
         {
+            verbs.Clear();
+
             XmlNode biv = doc.SelectSingleNode("//project/verbs/builtinverbs");
 
             XmlNodeList v = biv.SelectNodes("verb");
@@ -219,8 +231,11 @@ namespace XMLto6809
                 sw.WriteLine(header);
                 for (int i = 0; i < t.GetNumEntries(); i++)
                 {
-                    sw.WriteLine("\t.db " + t.GetEntry(i).Length);
-                    sw.WriteLine("\t.strz \"" + t.GetEntry(i) + "\" ; " + i);
+                    if (t.GetEntry(i).Length > 0) //safety check
+                    {
+                        sw.WriteLine("\t.db " + t.GetEntry(i).Length);
+                        sw.WriteLine("\t.strz \"" + t.GetEntry(i) + "\" ; " + i);
+                    }
                 }
                 sw.WriteLine("\t.db 0");
 
@@ -674,6 +689,8 @@ namespace XMLto6809
                     sw.WriteLine("actions_table");
                 else if (type.Equals("after"))
                     sw.WriteLine("postactions_table");
+                else
+                    throw new Exception("Invalid sentence type.");
 
                 foreach (XmlNode s in subs)
                 {
@@ -803,6 +820,7 @@ namespace XMLto6809
          */
         void PopulateSubroutineNames(XmlDocument doc)
         {
+            routineNames.Clear();
             XmlNodeList subs = doc.SelectNodes("//project/routines/routine");
 
             foreach (XmlNode n in subs)
@@ -818,6 +836,7 @@ namespace XMLto6809
         void PopulateVariableTable(XmlDocument doc)
         {
             XmlNodeList vars = doc.SelectNodes("//project/variables/builtin/var");
+            varTable.Clear();
 
             foreach (XmlNode n in vars)
             {
@@ -827,6 +846,7 @@ namespace XMLto6809
                 varTable[name] = addr;
             }
 
+            userVars.Clear();
 
             vars = doc.SelectNodes("//project/variables/user/var");
 

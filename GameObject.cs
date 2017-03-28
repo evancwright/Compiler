@@ -70,16 +70,27 @@ namespace XMLto6809
             XmlNode bd = data.SelectSingleNode("backdrop");
             if (bd != null)
             {
-                _isBackdrop = true;
-                properties[9]=1;
-                string roomStr = bd.Attributes["rooms"].Value;
-                string[] rooms = roomStr.Split(',');
+                
+                if ( bd.Attributes.GetNamedItem("rooms") != null)
+                {  
+                    string roomStr = bd.Attributes["rooms"].Value;
 
-                for (int i = 0; i < rooms.Length; i++)
-                {
-                    backdropRooms[i] = Convert.ToInt32(rooms[i].Trim());
+                    if (!roomStr.Equals(""))
+                    {
+                        _isBackdrop = true;
+                        properties[9] = 1;  //backdrop property
+
+                        string[] rooms = roomStr.Split(',');
+
+                        for (int i = 0; i < rooms.Length; i++)
+                        {
+                            backdropRooms[i] = Convert.ToInt32(rooms[i].Trim());
+                        }
+                    }
                 }
+                
             }
+            
         }
 
         private void LoadSynonyms(XmlNode data)
@@ -87,13 +98,17 @@ namespace XMLto6809
             XmlNode syns = data.SelectSingleNode("synonyms");
             if (syns != null)
             {
-                string names = syns.Attributes.GetNamedItem("names").Value;
-                char[] seps = { ',' };
-                string[] toks = names.Split(seps);
-
-                foreach (var item in toks)
+                XmlNode node = syns.Attributes.GetNamedItem("names");
+                if (node != null)
                 {
-                    synonyms.Add(item);
+                    string names = node.Value;
+                    char[] seps = { ',' };
+                    string[] toks = names.Split(seps);
+
+                    foreach (var item in toks)
+                    {
+                        synonyms.Add(item);
+                    }
                 }
             }
 
@@ -146,7 +161,13 @@ namespace XMLto6809
         public bool HasNogoMsg(string dir)
         {
             string val = "";
-            return nogoMap.TryGetValue(dir, out val);
+            if (!nogoMap.TryGetValue(dir, out val))
+            {
+                return false;
+            }
+
+            return (!val.Trim().Equals(""));
+            
         }
 
 
