@@ -322,17 +322,20 @@ get_obj_id
 	lda #$ff		; ff is 'not found'
 	pshu a		; push return value onto stack
 	pshu b		; save id param onto stack (local var)
-;	lda #0
-;@ol	pshs a		; push outer loop counter
 @ol	lda #1 		; inner loop counter (1 to skip id byte)
 @il	ldb a,y		; get word #
-;	cmpb #$ff	; is it empty?
-;	beq @sk		; skip if yes
 	cmpb 0,u	; is b equal to param?
 	bne @sk			
     ldb ,y		; get the id
+	jsr get_player_room		; and leave it on stack
+	pshu b 					; push (object)
+	jsr is_visible_child_of 
+	tst ,u  ; test result
+	pshs cc
+	leau 1,u ; pop stack
+	puls cc  
+	beq @sk  ; test result of is_visible
 	stb 1,u	; store id of word in return var 
-;	puls a		; pop outer loop counter
 	bra @x
 @sk inca 
 	cmpa #4		; (id byte + 3 cells) 
@@ -466,11 +469,11 @@ encode_sentence
 	ldx #word4			;load verb to print if not matched
 	cmpb #$ff			;was it found
 	lbeq print_ret_bad_noun	;
-	;tfr a,b				;lookup routine uses b as its param
-	;pulu a			; what was this for??????? HIGHLY SUSPICIOUS
 	jsr get_obj_id		;get the object it belongs to
 	pulu a
 	sta sentence+3		;store io
+	cmpa #$ff			; obj might not be visible
+	lbeq print_ret_no_see
 	bra @dn
 @np	lda word_count		;sentence is either verb or verb + obj
 	cmpa #1
@@ -486,6 +489,8 @@ encode_sentence
 	jsr get_obj_id		;get the object it belongs to
 	pulu a
 	sta sentence+1		;store id of d.o.
+	cmpa #$ff
+	lbeq print_ret_no_see
 @dn	nop ; run check rules
 	ldx #check_table
 @lp	lda ,x
