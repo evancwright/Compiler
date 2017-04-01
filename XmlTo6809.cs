@@ -9,64 +9,16 @@ using System.Windows.Forms;
 
 namespace XMLto6809
 {
-    class XmlTo6809
+    class XmlTo6809 : XmlConverter
     {
-        XmlDocument doc;
-        Table nameTable = new Table();
-        Table nogoTable = new Table();
-        Table descriptionTable = new Table();
-        Table dict = new Table();
-        Table verbs = new Table(); //unsplit strings
-        Table prepTable = new Table();
-        List<String> routineNames = new List<String>();
-        Dictionary<string, string> varTable = new Dictionary<string, string>(); //variables
-        List<UserVar> userVars = new List<UserVar>();
-
-        //Table strings = new Table(); //for events
-
-        List<GameObject> objects = new List<GameObject>();
 
         static XmlTo6809 instance = null;
-
-        static string[] asmFlagNames =   { "SCENERY_MASK", "SUPPORTER_MASK", "CONTAINER_MASK", "TRANSPARENT_MASK",
-                               "OPENABLE_MASK","OPEN_MASK", "LOCKABLE_MASK", "LOCKED_MASK", 
-                               "PORTABLE_MASK", "BACKDROP_MASK", "DRINKABLE_MASK", "FLAMMABLE_MASK", 
-                               "LIGHTABLE_MASK", "EMITTING_LIGHT_MASK","DOOR_MASK", "UNUSED_MASK" 
-                           };
-
-
-        struct UserVar
-        {
-            public string name;
-            public string initialVal;
-
-            public UserVar(string name, string value) 
-            {
-                this.name = name;
-                this.initialVal = value;
-            }
-
-        }
-
+         
         // string testRoutine = "if (GUARD HUT.holder==5) { print(\"You have the lamp\"); if (WHITE CUBE.description!=1) { print (\"It's open.\"); FLASHLIGHT.holder=offscreen;} }";
-        string[] preps = new string[]
-        {            	
-	        "IN",
-	        "AT",
-        	"TO",
-        	"INSIDE",
-        	"OUT",
-        	"UNDER",
-        	"ON",
-            "OFF",
-            "INTO",
-            "UP",
-            "WITH"
-        };
 
         private XmlTo6809()
         {
-            prepTable.Add(preps);
+           
         }
 
         public static XmlTo6809 GetInstance()
@@ -80,27 +32,20 @@ namespace XMLto6809
         }
         //ObjectTable objTable = new ObjectTable();
 
-        public void Convert(string fileName)
+        public void Convert6809(string fileName)
         {
-            doc = new XmlDocument();
+            
 
             //get the file path 
-            doc.Load(fileName);
-            descriptionTable.Clear();
-            descriptionTable.AddEntry("YOU NOTICE NOTHING UNEXPECTED.");
-            PopulateNameTable(doc);
-            PopulateNogoTable(doc);
-            PopulateVerbTable(doc);
-            PopulateVariableTable(doc);
-            PopulateSubroutineNames(doc);
-            ParseForStrings(doc);
+            CreateTables(fileName);
+
             WriteWelcomMessage();
-            WriteStringTable("DescriptionTable6809.asm", "description_table", descriptionTable);
-            WriteStringTable("Dictionary6809.asm", "dictionary", dict);
-            WriteStringTable("NogoTable6809.asm", "nogo_table", nogoTable);
-            WriteStringTable("PrepTable6809.asm", "prep_table", prepTable);
-            WriteObjectTable("ObjectTable6809.asm");
-            WriteObjectWordTable("ObjectWordTable6809.asm");
+            WriteStringTable6809("DescriptionTable6809.asm", "description_table", descriptionTable);
+            WriteStringTable6809("Dictionary6809.asm", "dictionary", dict);
+            WriteStringTable6809("NogoTable6809.asm", "nogo_table", nogoTable);
+            WriteStringTable6809("PrepTable6809.asm", "prep_table", prepTable);
+            WriteObjectTable6809("ObjectTable6809.asm");
+            WriteObjectWordTable("ObjectWordTable6809.asm", ".db");
             WriteVerbTable("VerbTable6809.asm");
             WriteCheckTable("CheckRules6809.asm");
             WriteSentenceTable("before");
@@ -112,115 +57,34 @@ namespace XMLto6809
         }
 
 
-        private void PopulateNogoTable(XmlDocument doc)
+        public void ConvertZ80(string fileName)
         {
-            XmlNode list = doc.SelectSingleNode("//project/objects");
-            nogoTable.Clear();
-            nogoTable.AddEntry("BLANK");
-            nogoTable.AddEntry("YOU CAN'T GO THAT WAY.");
 
-            foreach (XmlNode child in list)
-            {
-                XmlNode msgs = child.SelectSingleNode("nogo");
 
-                if (msgs != null)
-                {
-                    foreach (XmlNode n in msgs.ChildNodes)
-                    {
-                        if (!n.InnerText.Equals(""))
-                        {
-                            string msg = n.InnerText;
-                            nogoTable.AddEntry(msg);
-                        }
-                    }
-                }
+            //get the file path 
+            CreateTables(fileName);
 
-            }
-
+           // WriteWelcomMessage();
+            WriteStringTableZ80("StringTableZ80.asm", "string_table", descriptionTable);
+            WriteStringTableZ80("DictionaryZ80.asm", "dictionary", dict);
+            WriteStringTableZ80("NogoTableZ80.asm", "nogo_table", nogoTable);
+            WriteStringTableZ80("PrepTableZ80.asm", "prep_table", prepTable);
+          //  WriteObjectTable6809("ObjectTable6809.asm");
+            WriteObjectWordTable("ObjectWordTableZ80.asm", "DB");
+            WriteVerbTableZ80("VerbTableZ80.asm");
+           /*  WriteCheckTable("CheckRules6809.asm");
+               WriteSentenceTable("before");
+               WriteSentenceTable("instead");
+               WriteSentenceTable("after");
+               WriteEvents(doc);
+               WriteUserVarTable(doc);
+               WriteBackdropTable(doc); */
         }
 
-        private void PopulateNameTable(XmlDocument doc)
-        {
-            XmlNodeList list = doc.SelectNodes("//project/objects/object");
-            nameTable.Clear();
-            objects.Clear();
-            descriptionTable.Clear(); 
+      
+        
 
-            foreach (XmlNode n in list)
-            {
-                string name = n.Attributes.GetNamedItem("name").Value;
-                nameTable.AddEntry(name);
-
-                //get the child node with the description
-                XmlNode child = n.ChildNodes[0];
-                string desc = child.InnerText;
-
-                //don't add blank descriptions
-                if (desc != "")
-                {
-                    descriptionTable.AddEntry(desc);
-                }
-
-
-                //initial desc
-                string initialDesc = n.SelectSingleNode("initialdescription").InnerText;
-
-                if (initialDesc != "" && initialDesc != null)
-                {
-                    descriptionTable.AddEntry(initialDesc);
-                }
-
-                //break the name into words and put each word in the dictionary
-                char[] delimiterChars = { ' ' };
-                string[] toks = name.Split(delimiterChars);
-
-                foreach (string s in toks)
-                {
-                    if (s!=null && !s.Equals(""))
-                    {
-                        dict.AddEntry(s);
-                    }
-                }
-
-                //create the object from the data
-                GameObject gobj = new GameObject(n);
-                objects.Add(gobj);
-
-                foreach (string s in gobj.synonyms)
-                {
-                    if (!s.Equals(""))
-                        dict.AddEntry(s);
-                }
-
-            }
-
-        }
-
-
-        private void PopulateVerbTable(XmlNode doc)
-        {
-            verbs.Clear();
-
-            XmlNode biv = doc.SelectSingleNode("//project/verbs/builtinverbs");
-
-            XmlNodeList v = biv.SelectNodes("verb");
-
-            foreach (XmlNode n in v)
-            {
-                verbs.AddEntry(n.InnerText);
-            }
-
-            biv = doc.SelectSingleNode("//project/verbs/userverbs");
-
-            v = biv.SelectNodes("verb");
-
-            foreach (XmlNode n in v)
-            {
-                verbs.AddEntry(n.InnerText);
-            }
-        }
-
-        private void WriteStringTable(string fileName, string header, Table t)
+        private void WriteStringTable6809(string fileName, string header, Table t)
         {
             using (StreamWriter sw = File.CreateText(fileName))
             {
@@ -242,9 +106,31 @@ namespace XMLto6809
             }
 
         }
+        private void WriteStringTableZ80(string fileName, string header, Table t)
+        {
+            using (StreamWriter sw = File.CreateText(fileName))
+            {
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("; " + fileName);
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("");
+                sw.WriteLine(header);
+                for (int i = 0; i < t.GetNumEntries(); i++)
+                {
+                    if (t.GetEntry(i).Length > 0) //safety check
+                    {
+                        sw.WriteLine("\tDB " + t.GetEntry(i).Length);
+                        sw.WriteLine("\tDB \"" + t.GetEntry(i) + "\" ; " + i);
+                        sw.WriteLine("\tDB 0 ; null terminator");
+                    }
+                }
+                sw.WriteLine("\tDB 0");
 
+            }
 
-        private void WriteObjectTable(string fileName)
+        }
+
+        private void WriteObjectTable6809(string fileName)
         {
             using (StreamWriter sw = File.CreateText(fileName))
             {
@@ -356,8 +242,10 @@ namespace XMLto6809
         }
 
 
-        private void WriteObjectWordTable(string fileName)
+        private void WriteObjectWordTable(string fileName, string byteDirective=".DB")
         {
+
+
             using (StreamWriter sw = File.CreateText(fileName))
             {
                 sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
@@ -370,7 +258,7 @@ namespace XMLto6809
 
                 foreach (GameObject o in objects)
                 {
-                    sw.Write("\t.db " + o.id);
+                    sw.Write("\t" + byteDirective + " " + o.id);
 
                     string name = o.name;
 
@@ -401,7 +289,7 @@ namespace XMLto6809
                 {
                     if (o.synonyms.Count > 0)
                     {
-                        sw.Write("\t.db " + o.id);
+                        sw.Write("\t" + byteDirective + " " + o.id);
                         int blanks = 3 - o.synonyms.Count;
 
                         for (int i = 0; i < o.synonyms.Count; i++)
@@ -421,18 +309,12 @@ namespace XMLto6809
                     }//end write synonyms
                 }
 
-                sw.WriteLine("\t.db 255");
-                sw.WriteLine("obj_table_size\t.db " + objects.Count);
+                sw.WriteLine("\t" + byteDirective + " 255");
+                sw.WriteLine("obj_table_size\t" + byteDirective + " " + objects.Count);
             }
         }
 
-        private void WriteVerbDefs(string fileName)
-        {
-            using (StreamWriter sw = File.CreateText(fileName))
-            {
-            }
-        }
-
+       
 
         private void WriteVerbTable(string fileName)
         {
@@ -477,6 +359,54 @@ namespace XMLto6809
                 }
 
                 sw.WriteLine("\t.db 0,0");
+            }
+        }
+
+
+        private void WriteVerbTableZ80(string fileName)
+        {
+            using (StreamWriter sw = File.CreateText(fileName))
+            {
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("; VerbTableZ80.asm ");
+                sw.WriteLine("; Machine Generated Verb Table");
+                sw.WriteLine(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;");
+                sw.WriteLine("");
+
+                char[] seps = { ',' };
+
+
+                for (int i = 0; i < verbs.GetNumEntries(); i++)
+                {
+                    string verb = verbs.GetEntry(i);
+                    string[] toks = verb.Split(seps);
+                    string verb_id = toks[0].ToLower().Replace(' ', '_') + "_verb_id";
+                    sw.WriteLine(verb_id + " equ " + i);
+                }
+
+                sw.WriteLine("");
+                sw.WriteLine("");
+
+                sw.WriteLine("verb_table");
+
+
+                for (int i = 0; i < verbs.GetNumEntries(); i++)
+                {
+                    string verb = verbs.GetEntry(i);
+
+                    //split it up using commas
+                    string[] toks = verb.Split(seps);
+
+                    for (int j = 0; j < toks.Length; j++)
+                    {
+                        sw.WriteLine("\tDB " + i);
+                        sw.WriteLine("\tDB " + toks[j].Length);
+                        sw.WriteLine("\tDB \"" + toks[j].ToUpper() + "\"");
+                        sw.WriteLine("\tDB 0 ; null");
+                    }
+                }
+
+                sw.WriteLine("\tDB 255");
             }
         }
 
@@ -552,47 +482,7 @@ namespace XMLto6809
             }
 
         }
-
-        /*
-         * Scans for strings in the events and puts them in the description table.
-         */
-        private void ParseForStrings(XmlDocument doc)
-        {
-            XmlNodeList events = doc.SelectNodes("//project/events/event");
-
-            foreach (XmlNode n in events)
-            {
-                string code = n.InnerText;
-                ParseForStrings(code);
-            }
-
-            events = doc.SelectNodes("//project/routines/routine");
-
-            foreach (XmlNode n in events)
-            {
-                string code = n.InnerText;
-                ParseForStrings(code);
-            }
-        }
-
-
-        public void ParseForStrings(string code)
-        {
-            int start = code.IndexOf("\"");
-            if (start != -1)
-            {
-                string rem = code.Substring(start + 1);
-                int end = rem.IndexOf("\"");
-                string substr = rem.Substring(0, end);
-
-                descriptionTable.AddEntry(substr);
-                string rest = rem.Substring(end + 1);
-                ParseForStrings(rest);
-            }
-
-        }
-
-
+ 
 
         public int GetStringId(string text)
         {
@@ -815,51 +705,8 @@ namespace XMLto6809
             return -1;
         }
 
-        /*
-         * Solves dependency problems
-         */
-        void PopulateSubroutineNames(XmlDocument doc)
-        {
-            routineNames.Clear();
-            XmlNodeList subs = doc.SelectNodes("//project/routines/routine");
 
-            foreach (XmlNode n in subs)
-            {
-
-                string name = n.Attributes.GetNamedItem("name").Value;
-                //put name in list
-                string fileName = name.Replace(' ', '_');
-                routineNames.Add(fileName + "_sub");
-            }
-        }
-
-        void PopulateVariableTable(XmlDocument doc)
-        {
-            XmlNodeList vars = doc.SelectNodes("//project/variables/builtin/var");
-            varTable.Clear();
-
-            foreach (XmlNode n in vars)
-            {
-                string name = n.Attributes.GetNamedItem("name").Value;
-                string addr = n.Attributes.GetNamedItem("addr").Value;
-                string val = n.Attributes.GetNamedItem("value").Value;
-                varTable[name] = addr;
-            }
-
-            userVars.Clear();
-
-            vars = doc.SelectNodes("//project/variables/user/var");
-
-            foreach (XmlNode n in vars)
-            {
-                string name = n.Attributes.GetNamedItem("name").Value;
-                string addr = n.Attributes.GetNamedItem("addr").Value;
-                string val = n.Attributes.GetNamedItem("value").Value;
-                varTable[name] = name;
-
-                userVars.Add(new UserVar(name, val));
-            }
-        }
+       
 
         void WriteUserVarTable(XmlDocument doc)
         {

@@ -24,6 +24,8 @@ namespace XMLto6809
         string projectDirectory = ".\\output";
         string cygwinPath = "";
         string bashPath = "C:\\cygwin64\\bin";
+        string trs80workingDirectory = ".\\trs80Skel";
+
         public Form1()
         {
             InitializeComponent();
@@ -33,17 +35,6 @@ namespace XMLto6809
 
         private void button1_Click(object sender, EventArgs e)
         {
-            
-           // try
-           // {
-//                XmlTo6809 converter = XmlTo6809.GetInstance();
-  //              converter.Convert("f3xml.xml");
-            //}
-           // catch (Exception ex)
-           // {
-            //    MessageBox.Show(ex.Message);
-            //}
-            
         }
 
         private void configToolStripMenuItem_Click(object sender, EventArgs e)
@@ -76,13 +67,11 @@ namespace XMLto6809
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 string fileName = ofd.FileName;
-                converter.Convert(fileName);  //"f3xml.xml"
+                converter.Convert6809(fileName);  //"f3xml.xml"
             
             }
 
             Environment.CurrentDirectory = oldDir;
-
-            
             RunBuild();
 
         }
@@ -91,8 +80,6 @@ namespace XMLto6809
         void RunBuild()
         {
             //does the output directory exist?
-
-
 
             string oldDirectory = Environment.CurrentDirectory;
             Environment.CurrentDirectory = workingDirectory;
@@ -120,19 +107,37 @@ namespace XMLto6809
               //p = Process.Start("C:\\cygwin64\\bin\\bash", "-c \"lwasm --6809 main.asm --list=game.list --output=game.bin\"");
               p = Process.Start("C:\\cygwin64\\bin\\bash", "-c \"./build.sh\"");
               p.WaitForExit();
-
-               
-                  
-              MessageBox.Show("Done.");
-                  
-               
-              
+      
+              MessageBox.Show("Done.");                  
               Environment.CurrentDirectory = oldDirectory;
         }
 
         private void setupHelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start("notepad.exe", "setup.txt");
+        }
+
+        private void tRS80ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(trs80workingDirectory))
+            {
+                Directory.CreateDirectory(trs80workingDirectory);
+            }
+
+            XmlTo6809 converter = XmlTo6809.GetInstance();
+            string oldDir = Environment.CurrentDirectory;
+            Environment.CurrentDirectory = trs80workingDirectory;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+
+            ofd.Filter = "*xml files (*.xml)|*.xml";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                string fileName = ofd.FileName;
+                converter.ConvertZ80(fileName);  //"f3xml.xml"
+            }
+
         }
 
        
