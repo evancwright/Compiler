@@ -7,6 +7,13 @@ print_ret_pardon
 	call printcr
 	ret
 
+print_ret_no_io
+	ld hl,missing_io 
+	call OUTLIN
+	call printcr
+	ret
+	
+	
 print_ret_bad_verb
 	ld hl,badverb
 	call OUTLIN
@@ -17,11 +24,34 @@ print_ret_bad_verb
 	call printcr
 	ret
 
-badword DB "I DON'T RECOGNIZE THE WORD '"
+print_ret_bad_do
+	ld hl,badnoun
+	call OUTLIN
+	ld hl,word2
+	call OUTLIN
+	ld hl,period
+	call OUTLIN	
+	call printcr
+	ret
+
+print_ret_bad_io
+	ld hl,badnoun
+	call OUTLIN
+	ld hl,word4
+	call OUTLIN
+	ld hl,period
+	call OUTLIN	
+	call printcr
+	ret
+	
+badnoun DB "I DON'T RECOGNIZE THE WORD '"
 	DB 0 ; null	
 	
 badverb DB "I DON'T KNOW THE VERB '"
 	DB 0 ; null	
+	
+missing_io DB "IT LOOKS LIKE YOU ARE MISSING THE OBJECT OF THE PREPOSITION."
+	DB 0 ; null
 	
 pardon DB "PARDON"
 	DB 3fh
