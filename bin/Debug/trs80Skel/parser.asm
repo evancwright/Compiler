@@ -1,5 +1,5 @@
 ;z80 parser 
-
+*MOD
 parse
 		ld a,0	
 		ld (hit_end),a		; clear flag	
@@ -26,14 +26,106 @@ parse
 		ld hl,word2
 		ld (copydest),hl
 		call store_word
-		call handle_prep
+		call handle_prep ; compress preposition if needed
 		nop ; now validate the verb
 $vv?	call get_verbs_id
 		cp 0ffh
 		jp z,print_ret_bad_verb
 		ld (sentence),a			;store verb id
+		ld	a,(hit_end) ;hit end?
+		cp 1
+		jp z, $_x?
+		call skip_article	; skip article if present
+		ld hl,word2
+		ld (copydest),hl
+		call store_word
+		nop ; validate do
+		call lkp_directobj
+		nop ; call get_obj_id
+		ld	a,(hit_end) ;hit end?
+		cp 1
+		jp z, $_x?
+		call find_preposition 
+		ld a,(prep_found)
+		cp 0
+		jp z, $_x? ; if no prep, we're done since we already have the d.o.
+		nop ; skip prep and get io
+		ld a,(hit_end)		
+		cp 1
+		jp z,print_ret_no_io
+		nop ; get the next word  (the object of a preposition)
 $_x?	ret
-	
+
+;skip_article
+;moves to the next word.
+;if that word is an article
+;if it's not the last word
+;ix are positioned at the start of the next word1
+*MOD
+skip_article
+		push af
+		push de
+		push hl
+		call move_to_start
+		call move_to_end
+		ld a,(iy) 	
+		ld d,a	;save char (null or space)
+		ld a,0	;put a null there	
+		ld (iy),a
+		push iy 
+		ld iy,article_table ; ix is table to search
+		call get_table_index
+		pop iy
+		ld (iy),d ;replace null or space
+		cp 0ffh  ; not found -> take no action
+		jp z,$x?		
+		call move_to_start ; move to end of next word
+		call move_to_end
+$x?		pop hl
+		pop de
+		pop af
+		ret
+
+;this subroutine looks for a preposition
+;if a prep is found, prep_found is set to 1,
+;and the prep id is stored in sentence+2
+*MOD
+find_preposition
+		push af
+		push bc
+		push ix ; save in case prep not found
+		push iy
+		push hl
+$lp?	ld a,(hit_end)
+		cp 1
+		jp z,$x?
+		call move_to_start ; find next word
+		call move_to_end
+		ld b,(iy)	; save char we're going to null out
+		ld a,0
+		ld (iy),0   ;null out end of word
+		push iy
+		ld iy,prep_table
+		call get_table_index
+		ld (iy),b	; restore byte
+		ld a,b		; move result to a
+		pop iy		;
+		cp 0ffh
+		jp z,$lp?   ; if not prep hit, repeat
+		nop 		; hit a preposition
+		ld hl,word3
+		ld (copydest),hl
+		call store_word
+		ld (sentence+2),a
+		ld a,1
+		ld (prep_found),a 
+$x?		pop hl
+		pop iy
+		pop ix
+		pop bc
+		pop af
+		ret
+		
 copy_words_to_buffers
 		call move_to_end  ;get 1st word
 		call store_word	;
@@ -44,6 +136,7 @@ _x?		ret
 ;word is stuck on the end of word 1
 ;and copy addr is "backed up" to word2
 ;and word 2 is zeroed out.
+*MOD
 handle_prep
 	push iy
 	push ix
@@ -61,6 +154,7 @@ handle_prep
 	ld a,(word_count) ; wordcount--
 	dec a
 	ld (word_count),a
+	ld hl,word2
 $x?	pop bc
 	pop hl
 	pop ix
@@ -72,12 +166,18 @@ $x?	pop bc
 move_prep
 		push ix					; 2nd word was a prep
 		push iy
+		push de
+		ld a,(hit_end)	; save old flag
+		ld d,a
 		ld iy,word1
 		call move_to_end
 		ld a,20h ; space
 		ld (iy),a ; overwrite null with space
 		inc iy 	  ;move past space
 		call strcpyi
+		ld a,d
+		ld (hit_end),a
+		pop de
 		pop iy
 		pop ix
 		ret
@@ -86,6 +186,8 @@ move_prep
 		
 ;clears the variables where the words are stored
 clear_buffers
+		ld a,0				; clear the 
+		ld (prep_found),a
 		ld a,0ffh
 		ld (sentence),a
 		ld (sentence+1),a
@@ -158,7 +260,30 @@ store_word
 		ld de,(copydest)
 		ldir		; (hl)->(de)
 		ret
-	
+
+*MOD
+lkp_directobj
+		push ix
+		push iy
+		push af
+		ld ix,word2
+		ld iy,dictionary
+		call get_table_index
+		ld a,b
+		cp 0ffh	 ; was it found
+		jp nz,$_x?
+		nop ; look up obj and store it in sentence+1
+		pop af ; clean up stack for return jump
+		pop iy
+		pop ix
+		inc sp
+		inc sp
+		jp print_ret_bad_do
+$_x?	pop af
+		pop iy
+		pop ix
+		ret
+		
 word1 DS 32
 word2 DS 32
 word3 DS 32
@@ -168,6 +293,8 @@ word6 DS 32
 word7 DS 32
 word8 DS 32
 copydest DW 0000h
+prepaddr DW 0000h
 hit_end DB 0
 word_count DB 0
 sentence DS 4
+prep_found DB 0
