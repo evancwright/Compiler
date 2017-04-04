@@ -40,12 +40,10 @@ $vv?	call lkp_verb ; now validate the verb
 		nop ; store prep and move past it, then get io 
 		;jp z,print_ret_no_io
 		;nop ; get the next word  (the object of a preposition)
-		;call skip_article
-		;ld a,(hit_end)			; now at end?
-		;cp 1
-		;jp z,print_ret_no_io	
-		call move_to_start
-		call move_to_end
+		call skip_article
+		ld a,(ix)			; now at end?
+		cp 0
+		jp z,print_ret_no_io	
 		ld a,0		; null terminate last word
 		ld (iy),a
 		ld hl,word4
@@ -64,8 +62,6 @@ skip_article
 		push af
 		push de
 		push hl
-		call move_to_start ; position at next word
-		call move_to_end
 		ld a,(iy) 	
 		ld d,a	;save char (null or space)
 		ld a,0	;put a null there	
@@ -75,6 +71,7 @@ skip_article
 		call get_table_index
 		pop iy
 		ld (iy),d ;replace null or space
+		ld a,b
 		cp 0ffh  ; not found -> take no action
 		jp z,$x?		
 		call move_to_start ; move to end of next word
@@ -115,6 +112,8 @@ $lp?	ld a,(hit_end)
 		ld (sentence+2),a
 		ld a,1
 		ld (prep_found),a 
+		call move_to_start ; find next word
+		call move_to_end
 $x?		pop hl
 		pop de
 		pop bc
