@@ -23,6 +23,7 @@ parse
 		nop ; get 2nd word
 		call move_to_start
 		call move_to_end
+		call skip_article ; if article->go to next word
 		ld hl,word2
 		ld (copydest),hl
 		call store_word
@@ -246,7 +247,7 @@ read_dobj
 	ld a,(hit_end)
 	cp 1
 	ret z
-	nop  ; call skip_article
+	;	call skip_article  ; call skip_article
 	ld hl,word2
 	ld (copydest),hl
 	call move_to_start
