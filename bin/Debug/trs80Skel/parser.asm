@@ -33,6 +33,7 @@ $vv?	call lkp_verb ; now validate the verb
 		cp 1
 		jp z, $_x?			
 ;		call skip_article	; skip article if present
+		call lkp_directobj
 		call find_preposition  ;stores prep
 		ld a,(prep_found)
 		cp 0
