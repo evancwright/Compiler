@@ -2,8 +2,7 @@
 *MOD
 parse
 		ld a,0	
-		ld (hit_end),a		; clear flag	
-		ld (word_count),a	; reset to 0
+		ld (hit_end),a		; clear flag			ld (word_count),a	; reset to 0
 		ld hl,word1	
 		ld (copydest),hl	; set copy dest
 		ld a,(INBUF)		; get 1st char?	
@@ -12,46 +11,36 @@ parse
 		call clear_buffers
 		ld ix,INBUF		   ; set ix to input buffer
 		ld iy,INBUF		   ; set iy to input buffer
-		call move_to_start ; move to start of text
-		call copy_words_to_buffers
-		ld	a,(word_count)
-		inc a
-		ld (word_count),a
-		ld	a,(hit_end) ;hit end? (single verb command)
-		cp 1		
-		jp z,$vv?	
-		nop ; get 2nd word
-		call move_to_start
-		call move_to_end
-		call skip_article ; if article->go to next word
-		ld hl,word2
+		call move_to_next  ; move to end of 1st word	
+		call store_word	   ; save word 1	
+		call move_to_next	; try to bracket at 2nd word
+		ld a,(ix) ;hit end? (single verb command)
+		cp 0 
+		jp z,$_x?
+		call handle_prep ; compress preposition if needed and go to word 3
+		ld hl,word2		 ; copy direct object	
 		ld (copydest),hl
-		call store_word
-		call handle_prep ; compress preposition if needed
-$vv?	call lkp_verb ; now validate the verb
-		ld (sentence),a
-		ld	a,(hit_end) ;hit end?
-		cp 1
-		jp z, $_x?			
-;		call skip_article	; skip article if present
-		call lkp_directobj
+		call skip_article	; skip article if present
+		ld a,(ix) ;hit end? (single verb command)
+		cp 0 
+		jp z,$_x?
+		call store_word		; store direct object
 		call find_preposition  ;stores prep
 		ld a,(prep_found)
 		cp 0
 		jp z, $_x? ; if no prep, we're done since we already have the d.o.
 		nop ; store prep and move past it, then get io 
-		;jp z,print_ret_no_io
-		;nop ; get the next word  (the object of a preposition)
+		ld a,(ix) ;hit end?
+		cp 0 
+		jp z,print_ret_no_io
 		call skip_article
-		ld a,(ix)			; now at end?
-		cp 0
-		jp z,print_ret_no_io	
-		ld a,0		; null terminate last word
+		ld a,(ix) ;hit end?
+		cp 0 
+		jp z,print_ret_no_io
 		ld (iy),a
 		ld hl,word4
 		ld (copydest),hl
 		call store_word
-		call lkp_indirectobj
 $_x?	ret
 
 ;skip_article
@@ -76,8 +65,10 @@ skip_article
 		ld a,b
 		cp 0ffh  ; not found -> take no action
 		jp z,$x?		
-		call move_to_start ; move to end of next word
-		call move_to_end
+		ld hl,DbgSA
+		call OUTLIN
+		call printcr
+		call move_to_next ; move to end of next word
 $x?		pop hl
 		pop de
 		pop af
@@ -92,11 +83,10 @@ find_preposition
 		push bc
 		push de
 		push hl
-$lp?	ld a,(hit_end)
-		cp 1
+$lp?	ld a,(ix)
+		cp 0
 		jp z,$x?
-		call move_to_start ; find next word
-		call move_to_end
+		call move_to_next
 		ld d,(iy)	; save char we're going to null out
 		ld (iy),0   ;null out end of word
 		push iy
@@ -114,49 +104,43 @@ $lp?	ld a,(hit_end)
 		ld (sentence+2),a
 		ld a,1
 		ld (prep_found),a 
-		call move_to_start ; find next word
-		call move_to_end
+		call move_to_next ; find next word
 $x?		pop hl
 		pop de
 		pop bc
 		pop af
 		ret
-		
-copy_words_to_buffers
-		call move_to_end  ;get 1st word
-		call store_word	;
-_x?		ret
 
-
-;if the word in word2 is a prep, the 
-;word is stuck on the end of word 1
-;and copy addr is "backed up" to word2
+;if the word between ix and iy is a prep, the 
+;word is stuck on the end of word 1 and ix,iy
+;are moved to bracket the next word
 ;and word 2 is zeroed out.
 *MOD
 handle_prep
-	push iy
-	push ix
-	push hl
+	push af
 	push bc
-	ld ix,word2
+	push de
+	push hl
+	push iy
+	ld d,(iy) ; save char at end of word1
+	ld (iy),0 ; null terminate word for string cmp
 	ld iy,prep_table
 	call get_table_index	
+	pop iy
 	ld a,b
 	cp 0ffh ; found?
-	jp z,$x?
-	call move_prep
-	ld hl,word2
-	ld (copydest),hl
-	ld a,(word_count) ; wordcount--
-	dec a
-	ld (word_count),a
-	ld hl,word2
-	nop ; now get the direct object to catch up	
-	call read_dobj
-$x?	pop bc
-	pop hl
-	pop ix
-	pop iy
+	jp z,$x? ; exit on not found
+;	ld hl,DbgPF
+;	call OUTLIN
+	call move_prep ; doesn't change ix,iy
+	ld (iy),d	; restore null or space
+	call move_to_next ; move to next word
+	jp $y?
+$x?	ld (iy),d	; restore null or space
+$y?	pop hl
+	pop de
+	pop bc
+	pop af
 	ret
 
 ;moves word pointed to by ix
@@ -199,14 +183,23 @@ $lp 	ld (ix),b
 		cp 0
 		jp nz,$lp
 		ret
+		
+;brackets the next word with ix,iy		
+move_to_next
+	push iy ; move ix to end of last word
+	pop ix
+	ld a,(ix)
+	cp 0  ; null?
+	ret z	
+	call move_to_start ; move to start of text
+	call move_to_end ; move to start of text
+ 	ret
 	
 ;skips over spaces until ix points
 ;to a non space
 ;uses a,ix	
 *MOD
 move_to_start
-		push iy ;catch ix to end of last word
-		pop ix
 		push af
 $_lp	ld a,(ix)
 		cp 20h 		; space?
@@ -272,7 +265,7 @@ store_word
 		push ix  ; ix->hl	
 		pop hl
 		ld de,(copydest)
-		ldir		; (hl)->(de)
+		ldir		; (hl)->(de) until bc=0
 		pop hl
 		pop de
 		pop bc
@@ -336,6 +329,8 @@ $_x?	pop af
 		pop ix
 		ret
 
+DbgPF DB "DBG:PREP FOUND",0h		
+DbgSA DB "DBG:SKIPPING ARTICLE",0h		
 		
 word1 DS 32
 word2 DS 32
@@ -351,3 +346,4 @@ hit_end DB 0
 word_count DB 0
 sentence DS 4
 prep_found DB 0
+parse_err DB 0
