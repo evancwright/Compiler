@@ -17,8 +17,8 @@ parse
 		ld	a,(word_count)
 		inc a
 		ld (word_count),a
-		ld	a,(hit_end) ;hit end?
-		cp 1
+		ld	a,(hit_end) ;hit end? (single verb command)
+		cp 1		
 		jp z,$vv?	
 		nop ; get 2nd word
 		call move_to_start
@@ -27,53 +27,51 @@ parse
 		ld (copydest),hl
 		call store_word
 		call handle_prep ; compress preposition if needed
-		nop ; now validate the verb
-$vv?	call get_verbs_id
-		cp 0ffh
-		jp z,print_ret_bad_verb
-		ld (sentence),a			;store verb id
+$vv?	call lkp_verb ; now validate the verb
+		ld (sentence),a
 		ld	a,(hit_end) ;hit end?
 		cp 1
-		jp z, $_x?
-		call skip_article	; skip article if present
-		ld hl,word2
-		ld (copydest),hl
-		call store_word
-		nop ; validate do
-		call lkp_directobj
-		nop ; call get_obj_id
-		ld	a,(hit_end) ;hit end?
-		cp 1
-		jp z, $_x?
-		call find_preposition 
+		jp z, $_x?			
+;		call skip_article	; skip article if present
+		call find_preposition  ;stores prep
 		ld a,(prep_found)
 		cp 0
 		jp z, $_x? ; if no prep, we're done since we already have the d.o.
-		nop ; skip prep and get io
-		ld a,(hit_end)		
-		cp 1
-		jp z,print_ret_no_io
-		nop ; get the next word  (the object of a preposition)
+		nop ; store prep and move past it, then get io 
+		;jp z,print_ret_no_io
+		;nop ; get the next word  (the object of a preposition)
+		;call skip_article
+		;ld a,(hit_end)			; now at end?
+		;cp 1
+		;jp z,print_ret_no_io	
+		call move_to_start
+		call move_to_end
+		ld a,0		; null terminate last word
+		ld (iy),a
+		ld hl,word4
+		ld (copydest),hl
+		call store_word
+		call lkp_indirectobj
 $_x?	ret
 
 ;skip_article
-;moves to the next word.
-;if that word is an article
+;moves to the next word, if that word is an article
 ;if it's not the last word
-;ix are positioned at the start of the next word1
+;ix must point to the word to look at
+;ix are positioned at the start of the next word
 *MOD
 skip_article
 		push af
 		push de
 		push hl
-		call move_to_start
+		call move_to_start ; position at next word
 		call move_to_end
 		ld a,(iy) 	
 		ld d,a	;save char (null or space)
 		ld a,0	;put a null there	
 		ld (iy),a
 		push iy 
-		ld iy,article_table ; ix is table to search
+		ld iy,article_table ; iy is table to search
 		call get_table_index
 		pop iy
 		ld (iy),d ;replace null or space
@@ -86,30 +84,28 @@ $x?		pop hl
 		pop af
 		ret
 
-;this subroutine looks for a preposition
+;this subroutin e looks for a preposition
 ;if a prep is found, prep_found is set to 1,
 ;and the prep id is stored in sentence+2
 *MOD
 find_preposition
 		push af
 		push bc
-		push ix ; save in case prep not found
-		push iy
+		push de
 		push hl
 $lp?	ld a,(hit_end)
 		cp 1
 		jp z,$x?
 		call move_to_start ; find next word
 		call move_to_end
-		ld b,(iy)	; save char we're going to null out
-		ld a,0
+		ld d,(iy)	; save char we're going to null out
 		ld (iy),0   ;null out end of word
 		push iy
 		ld iy,prep_table
 		call get_table_index
-		ld (iy),b	; restore byte
-		ld a,b		; move result to a
 		pop iy		;
+		ld (iy),d	; restore byte
+		ld a,b		; move result to a
 		cp 0ffh
 		jp z,$lp?   ; if not prep hit, repeat
 		nop 		; hit a preposition
@@ -120,8 +116,7 @@ $lp?	ld a,(hit_end)
 		ld a,1
 		ld (prep_found),a 
 $x?		pop hl
-		pop iy
-		pop ix
+		pop de
 		pop bc
 		pop af
 		ret
@@ -155,6 +150,8 @@ handle_prep
 	dec a
 	ld (word_count),a
 	ld hl,word2
+	nop ; now get the direct object to catch up	
+	call read_dobj
 $x?	pop bc
 	pop hl
 	pop ix
@@ -243,9 +240,25 @@ _he?    	ld a,1
 			ld (hit_end),a
 $_x			pop af
 			ret
-
+;read do
+*MOD	
+read_dobj
+	ld a,(hit_end)
+	cp 1
+	ret z
+	nop  ; call skip_article
+	ld hl,word2
+	ld (copydest),hl
+	call move_to_start
+	call move_to_end
+	call store_word
+	ret
+			
 ;copies from (iy-ix) chars from ix to copydest
 store_word 
+		push bc
+		push de
+		push hl
 		scf	;clear the carry flag by setting it...
 		ccf ;then flipping it
 		push iy ; copy iy to hl
@@ -259,8 +272,22 @@ store_word
 		pop hl
 		ld de,(copydest)
 		ldir		; (hl)->(de)
+		pop hl
+		pop de
+		pop bc
 		ret
 
+*MOD
+lkp_verb
+	call get_verbs_id 
+	cp 0ffh
+	jp nz,$x?
+	inc sp  ; return from caller
+	inc sp
+	jp print_ret_bad_verb
+$x?	ld (sentence),a ; store verb
+	ret		
+		
 *MOD
 lkp_directobj
 		push ix
@@ -283,6 +310,31 @@ $_x?	pop af
 		pop iy
 		pop ix
 		ret
+		
+		
+*MOD
+lkp_indirectobj
+		push ix
+		push iy
+		push af
+		ld ix,word4
+		ld iy,dictionary
+		call get_table_index
+		ld a,b
+		cp 0ffh	 ; was it found
+		jp nz,$_x?
+		nop ; look up obj and store it in sentence+
+		pop af ; clean up stack for return jump
+		pop iy
+		pop ix
+		inc sp
+		inc sp
+		jp print_ret_bad_io
+$_x?	pop af
+		pop iy
+		pop ix
+		ret
+
 		
 word1 DS 32
 word2 DS 32
