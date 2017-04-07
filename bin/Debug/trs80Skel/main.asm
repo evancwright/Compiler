@@ -1,6 +1,7 @@
 ;main file for trs-80 shell
  
-
+*INCLUDE objdefsZ80.asm
+ 
 QINPUT equ 1bb3h
 CRTBYTE equ  0033H
 INBUF equ 41e8h
@@ -16,6 +17,16 @@ OUTLIN equ 28a7h		; src str in HL/
 main
 loop
 		call CLS
+		ld hl,welcome ; print welcome,author,version
+		call OUTLIN
+		call printcr
+		ld hl,author
+		call OUTLIN
+		call printcr
+		ld hl,version
+		call OUTLIN
+		call printcr
+		call look
 $inp?	call QINPUT
 		call parse
 		jp $inp?
@@ -33,16 +44,24 @@ $inp1?	push bc
 		call printcr
 		inc b
 		jp $inp1?
-	
+		ret
 	
 *INCLUDE parser.asm
-*INCLUDE print_rets.asm
-*INCLUDE strings.asm
-*INCLUDE PrepTableZ80.asm
+*INCLUDE look.asm
 *INCLUDE tables.asm
+*INCLUDE strings.asm
+*INCLUDE checksZ80.asm
+*INCLUDE routinesZ80.asm
+*INCLUDE print_rets.asm
+*INCLUDE articlesZ80.asm
+*INCLUDE PrepTableZ80.asm
 *INCLUDE StringTableZ80.asm
 *INCLUDE DictionaryZ80.asm
 *INCLUDE VerbTableZ80.asm
+*INCLUDE ObjectTableZ80.asm
 *INCLUDE ObjectWordTableZ80.asm
+*INCLUDE BackdropTableZ80.asm
+*INCLUDE CheckRulesZ80.asm
+*INCLUDE WelcomeZ80.asm
 	END 5000H
 END

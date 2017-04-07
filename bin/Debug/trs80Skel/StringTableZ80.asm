@@ -243,4 +243,4 @@ string_table
 	DB 17
 	DB "YOU NEED THE KEY." ; 79
 	DB 0 ; null terminator
-	DB 0
+	DB 255 ; end of table

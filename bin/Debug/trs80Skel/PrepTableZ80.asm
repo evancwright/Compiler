@@ -36,4 +36,4 @@ prep_table
 	DB 4
 	DB "WITH" ; 10
 	DB 0 ; null terminator
-	DB 0
+	DB 255 ; end of table

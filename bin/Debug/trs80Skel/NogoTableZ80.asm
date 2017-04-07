@@ -15,4 +15,4 @@ nogo_table
 	DB 47
 	DB "THE TRAFFIC IS TOO CONGESTED IN THAT DIRECTION." ; 3
 	DB 0 ; null terminator
-	DB 0
+	DB 255 ; end of table
