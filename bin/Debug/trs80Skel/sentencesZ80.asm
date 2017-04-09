@@ -72,19 +72,20 @@ $x?		pop iy
 action_run DB 0
 *MOD
 run_default_sentence
+		push bc
 		push de
 		push hl
 		ld ix,sentence_table
 $lp?	ld de,3		; reload de
 		ld a,(ix)
 		cp 0ffh ; end?
-		jp z,$c?
+		jp z,$x?
 		ld hl,sentence
-		cp (hl)
+		cp (hl)		; equal to verb?
 		jp nz,$c?
 		push ix	; ix -> hl
 		pop hl
-		inc hl
+		inc hl		;skip 1 byte to function address
 		ld e,(hl)
 		inc hl
 		ld d,(hl)
@@ -98,6 +99,7 @@ $c?		add ix,de		;skip to next
 		jp $lp?
 $x?		pop hl
 		pop de
+		pop bc
 		ret
 		
 run_events
