@@ -284,12 +284,14 @@ $x?	ld (sentence),a ; store verb
 		
 *MOD
 lkp_directobj
+		push af
+		push bc
+		push de
 		push ix
 		push iy
-		push af
 		ld ix,word2
 		ld iy,dictionary
-		call get_table_index
+		call get_table_index ; result in a
 		ld a,b
 		cp 0ffh	 ; was it found
 		jp nz,$_x?
@@ -299,10 +301,16 @@ lkp_directobj
 		pop ix
 		inc sp
 		inc sp
-		jp print_ret_bad_do
-$_x?	pop af
+		jp print_ret_bad_do ; returns
+$_x?	ld b,a
+		call get_obj_id
+		ld a,b
+		ld (sentence+1),a ; copy of b
 		pop iy
 		pop ix
+		pop de
+		pop bc
+		pop af
 		ret
 		
 		
@@ -324,11 +332,29 @@ lkp_indirectobj
 		inc sp
 		inc sp
 		jp print_ret_bad_io
-$_x?	pop af
+$_x?	ld (sentence+3),a
+		pop af
 		pop iy
 		pop ix
 		ret
 
+;looks at each word in sentence and
+;tries to convert it to an object or verb id
+encode
+		push af
+		call lkp_verb  ; bails if not found
+		ld a,(word2)
+		cp 0
+		jp z,$x?
+		call lkp_directobj
+		nop ; prep is already stored by parser
+		ld a,(word4)
+		cp 0
+		jp z,$x?
+		call lkp_indirectobj
+$x?		pop af
+		ret
+		
 DbgPF DB "DBG:PREP FOUND",0h		
 DbgSA DB "DBG:SKIPPING ARTICLE",0h		
 		
@@ -345,5 +371,6 @@ prepaddr DW 0000h
 hit_end DB 0
 word_count DB 0
 sentence DS 4
+
 prep_found DB 0
 parse_err DB 0

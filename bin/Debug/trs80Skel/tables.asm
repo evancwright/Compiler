@@ -113,7 +113,7 @@ $_lp?	ld a,(iy)
 		call streq ; test equality - result in a
 		cp 1    ; done - b contains index
 		jp z,$_x?	;jump if found
-		inc b		;update loop counter
+		inc b		;update loop counter (index)
 		dec iy		;back up an get length byte
 		ld d,0
 		ld e,(iy)
@@ -155,9 +155,9 @@ $lp?	ld a,(ix)	; hit end of table?
 $_y?	ld b,(ix)	; they match! back up put the id in b
 		jp $_x?
 $nf?	ld b,255 	; not found code
-		pop ix
+$_x?	pop ix
 		pop af
-$_x?	ret
+		ret
 
 
 ;get_verb_id
@@ -165,14 +165,15 @@ $_x?	ret
 ;returns the id # of the verb in a
 *MOD
 get_verbs_id
-		push ix
-		push iy
+		push bc
 		push de
 		push hl
-		ld b,0ffh			;assume not found
-		ld iy,word1
+		push ix
+		push iy
+ 		ld iy,word1
 		ld ix,verb_table
-$lp?	ld a,(ix)
+$lp?	ld a,(ix)       ;save the id byte
+		ld b,a
 		cp 0ffh	
 		jp z, $x?		; hit end of table
 		ld d,0			; set up de with len
@@ -180,7 +181,7 @@ $lp?	ld a,(ix)
 		ld e,(ix)		; get length byte
 		inc ix			;ix now at text
 		call streq
-		cp 1
+		cp 1   
 		jp z,$x?
 		push ix		;move ix to hl
 		pop hl
@@ -189,9 +190,11 @@ $lp?	ld a,(ix)
 		push hl		;transfer back to 2
 		pop ix 	; ix is always 2 bytes past hl
 		jp $lp?
-$x?		pop hl
-		pop de
+$x?		ld a,b
 		pop iy
 		pop ix
+		pop hl
+		pop de
+		pop bc
 		ret
 		

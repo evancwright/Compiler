@@ -49,6 +49,7 @@ $_x?	pop iy
 ;returns 1 or 0 in a
 *MOD
 streq
+	push bc
 	push ix
 	push iy
 $lp? ld a,(ix)	; get a byte
@@ -65,6 +66,7 @@ $y?  ld a,1
 $n?	ld a,0
 $x?	pop iy
 	pop ix
+	pop bc
 	ret 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;

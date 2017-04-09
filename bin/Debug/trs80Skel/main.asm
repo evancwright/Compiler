@@ -29,6 +29,11 @@ loop
 		call look
 $inp?	call QINPUT
 		call parse
+		ld a,(sentence)
+		cp 0
+		jp z,$inp?
+		call encode
+		call run_sentence
 		jp $inp?
 		ret
 	
@@ -51,8 +56,10 @@ $inp1?	push bc
 *INCLUDE tables.asm
 *INCLUDE strings.asm
 *INCLUDE checksZ80.asm
+*INCLUDE sentencesZ80.asm
 *INCLUDE routinesZ80.asm
 *INCLUDE print_rets.asm
+*INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
 *INCLUDE PrepTableZ80.asm
 *INCLUDE StringTableZ80.asm
@@ -60,8 +67,13 @@ $inp1?	push bc
 *INCLUDE VerbTableZ80.asm
 *INCLUDE ObjectTableZ80.asm
 *INCLUDE ObjectWordTableZ80.asm
-*INCLUDE BackdropTableZ80.asm
+*INCLUDE BackDropTableZ80.asm
+*INCLUDE before_table_Z80.asm
+*INCLUDE instead_table_Z80.asm
+*INCLUDE after_table_Z80.asm
 *INCLUDE CheckRulesZ80.asm
 *INCLUDE WelcomeZ80.asm
+*INCLUDE UserVarsZ80.asm
+score DB 0
 	END 5000H
 END

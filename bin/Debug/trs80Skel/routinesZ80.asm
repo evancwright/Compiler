@@ -92,6 +92,29 @@ $x?		pop de
 		ret
 		
 player_room DB 0
+
+;multiple b x c and puts result in bc
+;registers are preserved
+*MOD
+bmulc 
+		push af
+		push de
+		push ix
+		ld d,0 ; add c to b times
+		ld e,c
+		ld a,b ; use  b and loop counter
+		ld ix,0
+$lp?	cp 0
+		jp z,$x?
+		add ix,de
+		dec a
+		jp $lp?
+$x?		push ix ; ld bc,ix
+		pop bc
+		pop ix
+		pop de
+		pop af
+		ret
 	
 ;table of mask bytes for looking up
 ;properties of objects		
