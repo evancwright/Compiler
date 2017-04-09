@@ -7,16 +7,15 @@ get_obj_attr
 		push de
 		push hl
 		push ix
-		ld de,OBJ_ENTRY_SIZE
+		ld h,c
+		ld c,OBJ_ENTRY_SIZE
+		call bmulc
+		push bc
+		pop de
 		ld ix,obj_table
-		ld a,b 
-$lp?	cp 0	
-		jp z,$out?
-		add ix,de ;(skip OBJ_ENTRY_SIZE bytes) NOTE: ld ix,hl shouldn't assemble but does
-		dec a   
-		jp $lp?
-$out?	ld d,0
-		ld e,c
+		add ix,de	 ; add attr offset to ix
+		ld d,0
+		ld e,h
 		add ix,de	 ; add attr offset to ix
 		ld a,(ix)    ; finally get the byte
 		pop ix
@@ -25,6 +24,30 @@ $out?	ld d,0
 		pop bc
 		ret
 
+*MOD
+;set property c of object b to register a
+set_obj_attr
+		push bc
+		push de
+		push hl
+		push ix
+		ld h,c
+		ld c,OBJ_ENTRY_SIZE
+		call bmulc
+		push bc
+		pop de
+		ld ix,obj_table
+		add ix,de	 ; add table offset to ix
+		ld d,0
+		ld e,h
+		add ix,de	 ; move to byte
+		ld (ix),a    ; finally get the byte
+		pop ix
+		pop hl
+		pop de
+		pop bc
+		ret		
+		
 ;returns property c of object b in register a
 get_obj_prop
 		push bc

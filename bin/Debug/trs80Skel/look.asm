@@ -114,6 +114,16 @@ $x?		pop ix
 		ret
 
 look_at_sub
+		push af
+		ld a,(sentence+1)
+		ld b,a
+		ld c,DESC_ID
+		call get_obj_attr
+		ld b,a
+		ld ix,string_table
+		call print_table_entry
+		call printcr
+		pop af
 		ret
 		
 visobjs DB 0		
