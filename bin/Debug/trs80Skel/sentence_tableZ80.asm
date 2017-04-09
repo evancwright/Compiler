@@ -43,10 +43,6 @@ sentence_table
 	DW open_sub
 	DB close_verb_id
 	DW close_sub	
-	DB open_verb_id
-	DW open_sub 
-	DB close_verb_id
-	DW close_sub
 	DB smell_verb_id
 	DW smell_sub
 	DB listen_verb_id

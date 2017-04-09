@@ -30,7 +30,7 @@ run_actions
 		ld a,0				; clear flag
 		ld (action_run),a
 		ld iy,sentence
-		ld bc,6 	;size of entry
+		ld de,6 	;size of entry
 @lp?	ld a,(ix)	; load verb from table
 		cp 0ffh		; hit end of table
 		jp z,$x? 
@@ -61,6 +61,7 @@ run_actions
 		jp (hl)			; return will pop stack
 $nxt?	ld a,1
 		ld (action_run),a
+		jp $x?
 $c?		add ix,de			; skip to next entry 
 		jp @lp?
 $x?		pop iy
