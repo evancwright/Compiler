@@ -9,6 +9,7 @@ namespace XMLto6809
 {
     class GameObject
     {
+        public const int SIZE = 19;
         public const int NUM_ATTRIBS = 13;
         public const int NUM_PROPERTIES = 16;
         public const int NUM_BACKDROP_ROOMS = 5;

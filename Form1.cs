@@ -56,7 +56,7 @@ namespace XMLto6809
                 Directory.CreateDirectory(workingDirectory);
             }
 
-            XmlTo6809 converter = XmlTo6809.GetInstance();
+            XmlToTables converter = XmlToTables.GetInstance();
             string oldDir = Environment.CurrentDirectory;
             Environment.CurrentDirectory = workingDirectory;
 
@@ -124,7 +124,7 @@ namespace XMLto6809
                 Directory.CreateDirectory(trs80workingDirectory);
             }
 
-            XmlTo6809 converter = XmlTo6809.GetInstance();
+            XmlToTables converter = XmlToTables.GetInstance();
             string oldDir = Environment.CurrentDirectory;
             Environment.CurrentDirectory = trs80workingDirectory;
 
