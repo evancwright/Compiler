@@ -8,6 +8,9 @@ inventory_sub
 		ld hl,carrying
 	    call OUTLIN
 		call printcr
+		nop; recurse through child items
+		ld a,PLAYER_ID
+		call print_contents
 		jp $x?		
 $n?		ld hl,noitems
 	    call OUTLIN
@@ -15,6 +18,37 @@ $n?		ld hl,noitems
 $x?		pop af
 		ret
 
+;prints contains of obj in 'a'
+*MOD
+print_contents
+		push bc
+		push de
+		push hl
+		push ix
+		ld b,a	; save parent
+		ld de,OBJ_ENTRY_SIZE
+		ld ix,obj_table
+$lp?	ld a,(ix)
+		cp 0ffh
+		jp z,$x?
+		ld a,(ix+HOLDER_ID)
+		cp b
+		jp nz,$c?
+		bit SCENERY_BIT,(ix+PROPERTY_BYTE_1)  ; test scenery bit
+		jp nz,$c?
+		ld a,(ix)
+		call print_obj_name
+		call printcr
+		nop ; need to test container/suppoer
+$c?		add ix,de
+		jp $lp?
+$x?		ld b,a	; found flag->a
+		pop ix
+		pop hl
+		pop de
+		pop bc		
+		ret
+		
 ;if player has any visible items
 ;1 is returned in 'a' otherwise 0
 *MOD
@@ -93,3 +127,5 @@ taken DB "TAKEN.",0h
 dropped DB "DROPPED.",0h
 noitems DB "YOU ARE EMPTY HANDED.",0h
 carrying DB "YOU ARE CARRYING:",0h
+onitis DB "ON IT IS...",0h;
+initis DB "IN IT IS...",0h;
