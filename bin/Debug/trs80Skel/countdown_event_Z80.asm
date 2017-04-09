@@ -93,7 +93,7 @@ countdown_event
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; look()
-	call look
+	call look_sub
 $d?	nop ; close (player.holder == inside tardis)
 $c?	nop ; close (countDown==3)
 $b?	nop ; close (countDown != 3)

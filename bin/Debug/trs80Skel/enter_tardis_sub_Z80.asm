@@ -50,7 +50,7 @@ enter_tardis_sub
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; look()
-	call look
+	call look_sub
 	jp $b? ; skip else 
 $a?	nop ; close (tardis.open == 1)
 	nop ; { println("THE TARDIS IS CLOSED.")

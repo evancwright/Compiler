@@ -26,7 +26,7 @@ loop
 		ld hl,version
 		call OUTLIN
 		call printcr
-		call look
+		call look_sub
 $inp?	call QINPUT
 		call parse
 		ld a,(sentence)
@@ -57,7 +57,11 @@ $inp1?	push bc
 *INCLUDE strings.asm
 *INCLUDE checksZ80.asm
 *INCLUDE sentencesZ80.asm
+*INCLUDE movementZ80.asm
+*INCLUDE containersZ80.asm
 *INCLUDE routinesZ80.asm
+*INCLUDE inventoryZ80.asm
+*INCLUDE miscZ80.asm
 *INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm
 *INCLUDE articlesZ80.asm
@@ -72,6 +76,7 @@ $inp1?	push bc
 *INCLUDE instead_table_Z80.asm
 *INCLUDE after_table_Z80.asm
 *INCLUDE CheckRulesZ80.asm
+*INCLUDE sentence_tableZ80.asm
 *INCLUDE WelcomeZ80.asm
 *INCLUDE UserVarsZ80.asm
 score DB 0

@@ -8,6 +8,9 @@ run_sentence
 		;run instead
 		ld ix,actions_table
 		call run_actions
+		ld a,(action_run)
+		cp 1
+		call nz,run_default_sentence
 		;run actions
 		ld ix,postactions_table
 		call run_actions
@@ -15,13 +18,17 @@ run_sentence
 		;do events
 		ret
 
-;actions table in ix		
+;actions table in ix
+;post condition: action_run = 1
+;if a sentence was run
 *MOD
 run_actions
 		push bc
 		push de
 		push hl
 		push iy 
+		ld a,0				; clear flag
+		ld (action_run),a
 		ld iy,sentence
 		ld bc,6 	;size of entry
 @lp?	ld a,(ix)	; load verb from table
@@ -49,15 +56,48 @@ run_actions
 		ld d,(hl)
 		push de	; de -> hl
 		pop hl
-     	ld bc,$c?      ; push return addr on stack
+     	ld bc,$nxt?      ; push return addr on stack
 		push bc
 		jp (hl)			; return will pop stack
+$nxt?	ld a,1
+		ld (action_run),a
 $c?		add ix,de			; skip to next entry 
 		jp @lp?
 $x?		pop iy
 		pop hl
 		pop de
 		pop bc
+		ret
+
+action_run DB 0
+*MOD
+run_default_sentence
+		push de
+		push hl
+		ld ix,sentence_table
+$lp?	ld de,3		; reload de
+		ld a,(ix)
+		cp 0ffh ; end?
+		jp z,$c?
+		ld hl,sentence
+		cp (hl)
+		jp nz,$c?
+		push ix	; ix -> hl
+		pop hl
+		inc hl
+		ld e,(hl)
+		inc hl
+		ld d,(hl)
+		push de	; de -> hl
+		pop hl
+     	ld bc,$nxt?      ; push return addr on stack
+		push bc
+		jp (hl)			; return will pop stack
+$nxt?	ld de,3		; reload de
+$c?		add ix,de		;skip to next
+		jp $lp?
+$x?		pop hl
+		pop de
 		ret
 		
 run_events

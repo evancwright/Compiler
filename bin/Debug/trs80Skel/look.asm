@@ -1,7 +1,7 @@
 ;look.asm
 
 *MOD
-look
+look_sub
 		push bc
 		push de
 		push hl
@@ -111,6 +111,9 @@ $lp?	cp 0ffh
 		jp $lp
 $x?		pop ix
 		pop af
+		ret
+
+look_at_sub
 		ret
 		
 visobjs DB 0		
