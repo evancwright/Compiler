@@ -21,21 +21,18 @@ move_player
 		jp $x?
 $go?
 		nop ; is 'a' a door?
-		push af
+		ld e,a
 		ld b,a
 		ld c,DOOR
 		call get_obj_prop
 		cp 1 
-		pop af
+		ld a,e	
 		jp nz,$go2?   ; not a door- just go
 		nop ; is it closed?
-		push af
-		ld b,a
-		ld c,OPEN
+		ld c,OPEN ; b still contains obj id
 		call get_obj_prop
-		cp 0 		
-		pop af
-		jp nz, $go2?
+		cp 1	 		
+		jp z, $go2?	; not closed
 		ld hl,doorclosed
 		call OUTLIN
 		call printcr

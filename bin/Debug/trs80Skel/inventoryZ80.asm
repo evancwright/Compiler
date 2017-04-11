@@ -84,7 +84,7 @@ $x?		ld b,a	; found flag->a
 		pop de
 		pop bc
 		ret
-		
+*MOD		
 get_sub
 		push af
 		push bc
@@ -92,7 +92,18 @@ get_sub
 		push hl
 		push ix
 		push iy
-		ld a,(sentence+1)
+		ld a,(sentence+1) ; get dobj
+		ld b,a
+		ld c,PORTABLE
+		call get_obj_prop
+		cp 1
+		jp z,$y?
+		ld hl,notportable
+		call OUTLIN
+		call printcr
+		jp $x? 
+$y?		nop; move to player
+		ld a,(sentence+1)  ; get dobj
 		ld b,a
 		ld c,HOLDER_ID
 		ld a,PLAYER_ID
@@ -100,7 +111,7 @@ get_sub
 		ld hl,taken
 		call OUTLIN
 		call printcr
-		pop iy
+$x?		pop iy
 		pop ix
 		pop hl
 		pop de
@@ -108,6 +119,7 @@ get_sub
 		pop af
 		ret
 		
+*MOD
 drop_sub
 		push af
 		push bc
@@ -167,3 +179,4 @@ noitems DB "YOU ARE EMPTY HANDED.",0h
 carrying DB "YOU ARE CARRYING:",0h
 onitis DB "ON IT IS...",0h;
 initis DB "IN IT IS...",0h;
+notportable DB "YOU CAN'T PICK THAT UP.",0h

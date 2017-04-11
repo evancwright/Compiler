@@ -49,19 +49,25 @@ set_obj_attr
 		ret		
 		
 ;returns property c of object b in register a
+;the property should be 0-15 inclusive
 get_obj_prop
 		push bc
 		push de
 		ld d,PROPERTY_BYTE_1
 		ld a,c ; get the correct byte
+		ld e,c ; save the prop to get (we need it later) 
 		cp 8
-		jp m,$s? ;jump on carry (less than)
+		jp m,$s? ;jump on minus
 		inc d	; property is in the next byte
-$s?		ld c,d
-		call get_obj_attr ; put attr byte 'c' in 'a'		
-		call make_prop_mask ; puts mask in 'b'
-		and b ; test the bit in the mask
-		pop de
+$s?		ld c,d  ; move byte to get to c
+		call get_obj_attr ; put attr byte 'c' in 'a'
+	    ld b,e	; put prop to test in 'b'
+		call make_prop_mask ; puts mask from pop 'b' in 'b'
+		and b ; test the bit in the mask (and leave result in 'a')
+		cp 0		;it it's a zero, leave it
+		jp z,$x?
+		ld a,1		;conver non zero value to 1
+$x?		pop de
 		pop bc
 		ret
 
@@ -76,6 +82,7 @@ make_prop_mask
 	ld d,0	
 	ld e,b
 	add iy,de
+	dec iy 
 	ld b,(iy)	; load mask from table
 	pop iy
 	pop hl
