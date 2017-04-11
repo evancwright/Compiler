@@ -2,7 +2,8 @@
 *MOD
 inventory_sub
 		push af
-		call player_has_items
+		ld a,PLAYER_ID
+		call has_contents
 		cp 1
 		jp nz,$n?
 		ld hl,carrying
@@ -39,7 +40,11 @@ $lp?	ld a,(ix)
 		ld a,(ix)
 		call print_obj_name
 		call printcr
-		nop ; need to test container/suppoer
+		nop ; need to test container/supporter
+		bit CONTAINER_BIT,(ix+PROPERTY_BYTE_1)
+		call z,print_container_contents
+		bit SUPPORTER_BIT,(ix+PROPERTY_BYTE_1)
+		call z,print_supporter_contents
 $c?		add ix,de
 		jp $lp?
 $x?		ld b,a	; found flag->a
@@ -49,14 +54,15 @@ $x?		ld b,a	; found flag->a
 		pop bc		
 		ret
 		
-;if player has any visible items
+;if 'a' has any visible items
 ;1 is returned in 'a' otherwise 0
 *MOD
-player_has_items
+has_contents
 		push bc
 		push de
 		push hl
 		push ix
+		ld d,a
 		ld b,0	; found flag
 		ld de,OBJ_ENTRY_SIZE
 		ld ix,obj_table
@@ -64,7 +70,7 @@ $lp?	ld a,(ix)
 		cp 0ffh
 		jp z,$x?
 		ld a,(ix+HOLDER_ID)
-		cp PLAYER_ID
+		cp d
 		jp nz,$c?
 		bit SCENERY_BIT,(ix+PROPERTY_BYTE_1)  ; test scenery bit
 		jp nz,$c?
@@ -121,6 +127,38 @@ drop_sub
 		pop ix
 		pop bc
 		pop af
+		ret
+
+*MOD		
+;print contents of container in 'a'
+print_container_contents
+		push bc
+		push hl
+		call has_contents
+		cp 1
+		jp nz,$x?
+		ld hl,initis
+		call OUTLIN
+		call printcr
+		call print_contents
+$x?		pop hl
+		pop bc
+		ret
+
+*MOD		
+;print contents of container in 'a'
+print_supporter_contents
+		push bc
+		push hl
+		call has_contents
+		cp 1
+		jp nz,$x?
+		ld hl,onitis
+		call OUTLIN
+		call printcr
+		call print_contents
+$x?		pop hl
+		pop bc
 		ret
 		
 taken DB "TAKEN.",0h		

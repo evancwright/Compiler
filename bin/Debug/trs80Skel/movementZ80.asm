@@ -1,14 +1,58 @@
 ;movement.asm
 ;puts move dir in a
 
+*MOD
 move_player
-
-	ret
+		push bc
+		push ix
+		;convert the verb to a direction
+		call get_player_room
+		ld b,a ; save room
+		call get_move_dir
+		ld c,a	;direction code
+		call get_obj_attr ; dir in 'a'->
+		cp 128	; ? is it positive or negative
+		jp m,$go?
+		neg		; flip accumulator (2's complement)
+		ld b,a
+		ld ix,nogo_table
+		call print_table_entry
+		call printcr
+		jp $x?
+$go?
+		nop ; is 'a' a door?
+		push af
+		ld b,a
+		ld c,DOOR
+		call get_obj_prop
+		cp 1 
+		pop af
+		jp nz,$go2?   ; not a door- just go
+		nop ; is it closed?
+		push af
+		ld b,a
+		ld c,OPEN
+		call get_obj_prop
+		cp 0 		
+		pop af
+		jp nz, $go2?
+		ld hl,doorclosed
+		call OUTLIN
+		call printcr
+		jp $x?
+$go2?	ld b,PLAYER_ID		; move player to location
+		ld c,HOLDER_ID
+		call set_obj_attr	
+		call look_sub
+$x?		pop ix
+		pop bc
+		ret
 
 enter_sub
 		ret
 	
 ;puts move dir (attr) in a 	
+*MOD
 get_move_dir
 		push de
 		push ix
@@ -20,22 +64,24 @@ get_move_dir
 		add ix,de
 		ld a,(ix)	
 		pop ix
-		push de
+		pop de
 		ret
 
 ;direction table
 ;maps direction verb id to the attribute numbers
 direction_map
-	DB 5 ; N
-	DB 6 ; SOUTH
-	DB 7 ; EAST
-	DB 8 ; WEST 
-	DB 9 ; NORTHEAST 
-	DB 10 ; SOUTHEAST 
-	DB 11 ;SOUTHWEST
-	DB 12 ;NORTHWEST
-	DB 13 ;UP 
-	DB 14 ;DOWN 
-	DB 15 ;ENTER 
-	DB 16 ;OUT 
+	DB 4 ; N
+	DB 5 ; SOUTH
+	DB 6 ; EAST
+	DB 7 ; WEST 
+	DB 8 ; NORTHEAST 
+	DB 9 ; SOUTHEAST 
+	DB 10 ;SOUTHWEST
+	DB 11 ;NORTHWEST
+	DB 12 ;UP 
+	DB 13 ;DOWN 
+	DB 14 ;ENTER 
+	DB 15 ;OUT 
 	DB 0ffh
+	
+doorclosed DB "THE DOOR IS CLOSED.",0h	

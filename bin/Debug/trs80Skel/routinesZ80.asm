@@ -7,15 +7,15 @@ get_obj_attr
 		push de
 		push hl
 		push ix
-		ld h,c
+		ld h,c	; save attr in h
 		ld c,OBJ_ENTRY_SIZE
 		call bmulc
-		push bc
+		push bc	; bc->de
 		pop de
 		ld ix,obj_table
 		add ix,de	 ; add attr offset to ix
-		ld d,0
-		ld e,h
+		ld d,0		 ; create the attr offset
+		ld e,h	
 		add ix,de	 ; add attr offset to ix
 		ld a,(ix)    ; finally get the byte
 		pop ix
@@ -55,7 +55,7 @@ get_obj_prop
 		ld d,PROPERTY_BYTE_1
 		ld a,c ; get the correct byte
 		cp 8
-		jp c,$s? ;jump on carry (less than)
+		jp m,$s? ;jump on carry (less than)
 		inc d	; property is in the next byte
 $s?		ld c,d
 		call get_obj_attr ; put attr byte 'c' in 'a'		

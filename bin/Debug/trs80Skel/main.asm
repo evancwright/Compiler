@@ -71,6 +71,7 @@ $inp1?	push bc
 *INCLUDE VerbTableZ80.asm
 *INCLUDE ObjectTableZ80.asm
 *INCLUDE ObjectWordTableZ80.asm
+*INCLUDE NogoTableZ80.asm
 *INCLUDE BackDropTableZ80.asm
 *INCLUDE before_table_Z80.asm
 *INCLUDE instead_table_Z80.asm

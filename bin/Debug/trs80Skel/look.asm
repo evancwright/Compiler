@@ -13,21 +13,25 @@ look_sub
 		ld h,a
 		call print_obj_description
 		nop ; now print all visible objects
-		ld ix,obj_table
-$lp?	ld a,(ix);get id
-		cp 0		; skip offscreen
-		jp z,$c?
-		cp 1		; skip player
-		jp z,$c?
-		cp 0ffh
+		call has_contents
+		cp 0
 		jp z,$x?
-		nop ; is this object in this room?
-		ld b,a  ; put id byte in b for print_object
-		ld a,(ix+1) ; get holder byte
-		cp h		; compare to player's room (h)
-		call z,print_obj ; look at id 'b'
-$c?		add ix,de ; skip object
-		jp $lp?
+		call print_contents
+;		ld ix,obj_table
+;$lp?	ld a,(ix);get id
+;		cp 0		; skip offscreen
+;		jp z,$c?
+;		cp 1		; skip player
+;		jp z,$c?
+;		cp 0ffh
+;		jp z,$x?
+;		nop ; is this object in this room?
+;		ld b,a  ; put id byte in b for print_object
+;		ld a,(ix+1) ; get holder byte
+;		cp h		; compare to player's room (h)
+;		call z,print_obj ; look at id 'b'
+;$c?		add ix,de ; skip object
+;		jp $lp?
 $x?		pop ix
 		pop hl
 		pop de
