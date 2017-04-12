@@ -17,7 +17,7 @@ follow_player_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,22
+	ld a,22; dalek
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -42,7 +42,7 @@ follow_player_event
 	nop ; dalek.holder = player.holder
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -55,7 +55,7 @@ follow_player_event
 	ld a,(ix) ; get attr byte byte
 	push af
 	push bc
-	ld a,22
+	ld a,22; dalek
 	ld b,a
 	ld c, 19
 	call bmulc

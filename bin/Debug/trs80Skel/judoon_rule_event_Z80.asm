@@ -13,7 +13,7 @@ judoon_rule_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -31,7 +31,7 @@ judoon_rule_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,19
+	ld a,19; mannequin
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -57,7 +57,7 @@ judoon_rule_event
 	 ld a,7 ;north street
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc

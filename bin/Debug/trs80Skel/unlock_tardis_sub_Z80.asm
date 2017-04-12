@@ -13,7 +13,7 @@ unlock_tardis_sub
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,26
+	ld a,26; sonic screwdriver
 	ld b,a
 	ld c, 19
 	call bmulc

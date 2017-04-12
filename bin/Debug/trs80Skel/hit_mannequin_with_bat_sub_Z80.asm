@@ -30,7 +30,7 @@ hit_mannequin_with_bat_sub
 	ld a,0
 	push af
 	push bc
-	ld a,19
+	ld a,19; mannequin
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -45,7 +45,7 @@ hit_mannequin_with_bat_sub
 	 ld a,12 ;inventory room
 	push af
 	push bc
-	ld a,25
+	ld a,25; torso
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -60,7 +60,7 @@ hit_mannequin_with_bat_sub
 	 ld a,12 ;inventory room
 	push af
 	push bc
-	ld a,24
+	ld a,24; plastic head
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -75,7 +75,7 @@ hit_mannequin_with_bat_sub
 	 ld a,-1 ;"ROSE IS HERE CHECKING THE INVENTORY."
 	push af
 	push bc
-	ld a,21
+	ld a,21; rose
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -105,7 +105,7 @@ hit_mannequin_with_bat_sub
 	 ld a,1 ;player
 	push af
 	push bc
-	ld a,30
+	ld a,30; key
 	ld b,a
 	ld c, 19
 	call bmulc

@@ -243,4 +243,16 @@ string_table
 	DB 17
 	DB "YOU NEED THE KEY." ; 79
 	DB 0 ; null terminator
+	DB 5
+	DB "DONE." ; 80
+	DB 0 ; null terminator
+	DB 12
+	DB "IT'S LOCKED." ; 81
+	DB 0 ; null terminator
+	DB 18
+	DB "IT'S ALREADY OPEN." ; 82
+	DB 0 ; null terminator
+	DB 20
+	DB "THAT'S NOT OPENABLE." ; 83
+	DB 0 ; null terminator
 	DB 255 ; end of table

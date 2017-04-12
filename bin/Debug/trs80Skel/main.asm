@@ -61,6 +61,8 @@ $inp1?	push bc
 *INCLUDE containersZ80.asm
 *INCLUDE routinesZ80.asm
 *INCLUDE inventoryZ80.asm
+*INCLUDE open_close.asm
+*INCLUDE put.asm
 *INCLUDE miscZ80.asm
 *INCLUDE print_rets.asm
 *INCLUDE EventsZ80.asm

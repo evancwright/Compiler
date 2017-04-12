@@ -20,7 +20,7 @@ unlock_door_with_key_sub
 	nop ; 29.open = 1
 	push af
 	push bc
-	ld a,29
+	ld a,29; 29
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -34,7 +34,7 @@ unlock_door_with_key_sub
 	nop ; 29.locked = 0
 	push af
 	push bc
-	ld a,29
+	ld a,29; 29
 	ld b,a
 	ld c, 19
 	call bmulc

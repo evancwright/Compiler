@@ -13,7 +13,7 @@ game_won_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc

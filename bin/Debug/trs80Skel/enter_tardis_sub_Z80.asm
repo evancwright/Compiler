@@ -10,7 +10,7 @@ enter_tardis_sub
 	push iy
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -20,7 +20,7 @@ enter_tardis_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	bit 5,(ix) ; test prop bit
+	bit 5,(ix) ; test open prop bit
 	push bc ; flags to a
 	push af ; tfr flags to acc
 	pop bc
@@ -31,14 +31,14 @@ enter_tardis_sub
 	srl a ; right justify z bit
 	srl a ; right justify z bit
 	srl a ; right justify z bit
-	srl a ; right justify z bit
+	ld b,1
 	cp b ; == 1 ?
 	jp z,$a?
 	nop ; player.holder = inside tardis
 	 ld a,4 ;inside tardis
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc

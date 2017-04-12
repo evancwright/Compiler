@@ -13,7 +13,7 @@ move_mannequin_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -34,7 +34,7 @@ move_mannequin_event
 	 ld a,4 ;inside tardis
 	push af
 	push bc
-	ld a,22
+	ld a,22; dalek
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -48,7 +48,7 @@ move_mannequin_event
 	nop ; tardis.locked=1
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -62,7 +62,7 @@ move_mannequin_event
 	nop ; tardis.open=0
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -80,7 +80,7 @@ move_mannequin_event
 	nop ; tardis.lockable=0
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -100,7 +100,7 @@ move_mannequin_event
 	 ld a,12 ;inventory room
 	push af
 	push bc
-	ld a,19
+	ld a,19; mannequin
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -114,7 +114,7 @@ move_mannequin_event
 	nop ; door.locked = 0
 	push af
 	push bc
-	ld a,13
+	ld a,13; door
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -132,7 +132,7 @@ move_mannequin_event
 	nop ; door.lockable = 0
 	push af
 	push bc
-	ld a,13
+	ld a,13; door
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -151,7 +151,7 @@ move_mannequin_event
 	 ld a,-1 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
 	push af
 	push bc
-	ld a,19
+	ld a,19; mannequin
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -166,7 +166,7 @@ move_mannequin_event
 	 ld a,-1 ;"THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
 	push af
 	push bc
-	ld a,19
+	ld a,19; mannequin
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -182,7 +182,7 @@ move_mannequin_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,23
+	ld a,23; hat
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -199,7 +199,7 @@ move_mannequin_event
 	 ld a,-1 ;"A STYLISH HAT LIES ON THE FLOOR."
 	push af
 	push bc
-	ld a,23
+	ld a,23; hat
 	ld b,a
 	ld c, 19
 	call bmulc

@@ -10,7 +10,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	push iy
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -20,7 +20,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	bit 7,(ix) ; test prop bit
+	bit 7,(ix) ; test locked prop bit
 	push bc ; flags to a
 	push af ; tfr flags to acc
 	pop bc
@@ -32,6 +32,8 @@ unlock_tardis_with_sonicscrewdriver_sub
 	srl a ; right justify z bit
 	srl a ; right justify z bit
 	srl a ; right justify z bit
+	srl a ; right justify z bit
+	ld b,1
 	cp b ; == 1 ?
 	jp z,$a?
 	nop ; println("AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.")
@@ -46,7 +48,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	nop ; tardis.open = 1
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -60,7 +62,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	nop ; tardis.locked=0
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -78,7 +80,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	nop ; tardis.lockable=0
 	push af
 	push bc
-	ld a,3
+	ld a,3; tardis
 	ld b,a
 	ld c, 19
 	call bmulc

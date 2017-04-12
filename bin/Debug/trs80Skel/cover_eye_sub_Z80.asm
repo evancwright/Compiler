@@ -48,7 +48,7 @@ cover_eye_sub
 	ld a,0
 	push af
 	push bc
-	ld a,27
+	ld a,27; eyestalk
 	ld b,a
 	ld c, 19
 	call bmulc

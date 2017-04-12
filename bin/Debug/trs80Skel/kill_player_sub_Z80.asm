@@ -21,7 +21,7 @@ kill_player_sub
 	ld a,1
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc

@@ -50,6 +50,7 @@ set_obj_attr
 		
 ;returns property c of object b in register a
 ;the property should be 0-15 inclusive
+*MOD
 get_obj_prop
 		push bc
 		push de
@@ -71,6 +72,37 @@ $x?		pop de
 		pop bc
 		ret
 
+;sets property c of object b to val in register 'a'
+;the property should be 0-15 inclusive
+*MOD
+set_obj_prop
+		push bc
+		push de
+		push hl
+		ld l,a ; save val
+		ld d,PROPERTY_BYTE_1
+		ld a,c ; get the correct byte
+		ld e,c ; save the prop to get (we need it later) 
+		cp 8
+		jp m,$s? ;jump on minus
+		inc d	; property is in the next byte
+$s?		ld c,d  ; move byte to get to c
+		call get_obj_attr ; put attr byte 'c' in 'a'
+		ld h,b	; save 'b' (the object)
+		ld b,e	; put prop to test in 'b'
+		call make_prop_mask ; puts mask from pop 'b' in 'b'
+		or b ; test the bit in the mask (and leave result in 'a')
+		ld b,h 		; put obj in 'b'
+		;ld a,b		; now set it back (val->a)
+		ld a,1
+		ld c,d		;the byte to store
+		call set_obj_attr ;  put a
+$x?		pop hl
+		pop de
+		pop bc
+		ret
+		
+		
 ;looks up the mask for the property number in b
 ;mask is returned in 'b'
 ;c is not changed

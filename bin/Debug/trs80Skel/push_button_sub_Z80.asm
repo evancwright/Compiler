@@ -13,7 +13,7 @@ push_button_sub
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,15
+	ld a,15; elevator
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -48,7 +48,7 @@ push_button_sub
 	 ld a,17 ;hallway
 	push af
 	push bc
-	ld a,15
+	ld a,15; elevator
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -83,7 +83,7 @@ $a?	nop ; close (elevator.e == lobby)
 	 ld a,14 ;lobby
 	push af
 	push bc
-	ld a,15
+	ld a,15; elevator
 	ld b,a
 	ld c, 19
 	call bmulc

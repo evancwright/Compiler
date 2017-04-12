@@ -39,7 +39,7 @@ countdown_event
 	ld a,0
 	push af
 	push bc
-	ld a,22
+	ld a,22; dalek
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -55,7 +55,7 @@ countdown_event
 	ld b,a  ; move rhs in a
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc
@@ -81,7 +81,7 @@ countdown_event
 	 ld a,28 ;trenzalore
 	push af
 	push bc
-	ld a,1
+	ld a,1; player
 	ld b,a
 	ld c, 19
 	call bmulc

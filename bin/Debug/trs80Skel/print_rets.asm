@@ -61,26 +61,13 @@ print_ret_not_openable
 	call OUTLIN
 	call printcr
 	ret
-
-print_ret_no_surface
-	ld hl,notsupporter
-	call OUTLIN
-	call printcr
-	ret
 	
-print_ret_not_container
-	ld hl,notcontainer
-	call OUTLIN
-	call printcr
-	ret
 	
 	
 pitchdark DB "IT IS PITCH DARK.",0h
 dontsee DB "YOU DON'T SEE THAT.",0h
 donthave DB "YOU DON'T HAVE THAT.",0h
 cantopen DB "THAT'S N0T SOMETHING YOU CAN OPEN.",0h
-notsupporter DB "YOU FIND NO SUITABLE SURFACE.",0h
-notcontainer DB "YOU CAN'T PUT THINGS IN THAT.",0h
 badnoun DB "I DON'T RECOGNIZE THE WORD '",0h ; null	
 badverb DB "I DON'T KNOW THE VERB '", 0 ; null	
 missing_io DB "IT LOOKS LIKE YOU ARE MISSING THE OBJECT OF THE PREPOSITION.", 0h
