@@ -11,10 +11,12 @@ countdown_event
 	ld a,1
 	ld b,a ; put rhs in b
 	ld a,(activated); activated
-	jp z,$a?
+	cp b ; ==1?
+	jp nz,$a?
 	ld a,3
 	ld b,a ; put rhs in b
 	ld a,(countDown); countDown
+	cp b ; !=3?
 	jp z,$b?
 	nop ; add(countDown,1)
 	push af
@@ -25,7 +27,8 @@ countdown_event
 	ld a,3
 	ld b,a ; put rhs in b
 	ld a,(countDown); countDown
-	jp z,$c?
+	cp b ; ==3?
+	jp nz,$c?
 	nop ; println("AS THE SELF DESTRUCT ACTIVATES, THE DALEK IS SHATTERED BY A POWERFUL INTERNAL EXPLOSION.")
 	push af
 	push ix
@@ -52,7 +55,7 @@ countdown_event
 	 ld (ix), a ; store rhs in lhs
 	nop ; test ((player.holder == inside tardis))
 	 ld a,4 ; inside tardis
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,1; player
@@ -67,7 +70,7 @@ countdown_event
 	pop af
 	ld a,(ix)
 	cp b ; == inside tardis?
-	jp z,$d?
+	jp nz,$d?
 	nop ; println("THE MASSIVE CONCUSSSION, TRAPPED INSIDE THE TARDIS, KILLS YOU INSTANTLY.")
 	push af
 	push ix

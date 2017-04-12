@@ -10,7 +10,7 @@ push_button_sub
 	push iy
 	nop ; test ((elevator.e == lobby))
 	 ld a,14 ; lobby
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,15; elevator
@@ -25,7 +25,7 @@ push_button_sub
 	pop af
 	ld a,(ix)
 	cp b ; == lobby?
-	jp z,$a?
+	jp nz,$a?
 	nop ; println("THE LIFT SLOWLY RISES TO THE UPPER FLOOR.")
 	push af
 	push ix

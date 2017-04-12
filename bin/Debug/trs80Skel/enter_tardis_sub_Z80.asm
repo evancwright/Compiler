@@ -33,7 +33,7 @@ enter_tardis_sub
 	srl a ; right justify z bit
 	ld b,1
 	cp b ; == 1 ?
-	jp z,$a?
+	jp nz,$a?
 	nop ; player.holder = inside tardis
 	 ld a,4 ;inside tardis
 	push af

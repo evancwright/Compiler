@@ -10,7 +10,7 @@ unlock_door_sub
 	push iy
 	nop ; test ((key.holder == player))
 	 ld a,1 ; player
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,30; key
@@ -25,7 +25,7 @@ unlock_door_sub
 	pop af
 	ld a,(ix)
 	cp b ; == player?
-	jp z,$a?
+	jp nz,$a?
 	nop ; println("THE DOOR IS NOW UNLOCKED")
 	push af
 	push ix
@@ -64,7 +64,7 @@ unlock_door_sub
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,128 ; get locked bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	jp $b? ; skip else 

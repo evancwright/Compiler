@@ -51,4 +51,9 @@ sentence_table
 	DW enter_sub
 	DB quit_verb_id
 	DW quit_sub
+	DB lock_verb_id
+	DW lock_sub
+	DB unlock_verb_id
+	DW unlock_sub
 	DB 255
+	

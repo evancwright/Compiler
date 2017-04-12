@@ -35,7 +35,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	srl a ; right justify z bit
 	ld b,1
 	cp b ; == 1 ?
-	jp z,$a?
+	jp nz,$a?
 	nop ; println("AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.")
 	push af
 	push ix
@@ -74,7 +74,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,128 ; get locked bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	nop ; tardis.lockable=0
@@ -92,7 +92,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,64 ; get lockable bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	jp $b? ; skip else 

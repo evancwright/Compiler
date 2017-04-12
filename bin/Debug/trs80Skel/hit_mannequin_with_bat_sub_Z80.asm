@@ -72,7 +72,7 @@ hit_mannequin_with_bat_sub
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; rose.initial_description = "ROSE IS HERE CHECKING THE INVENTORY."
-	 ld a,-1 ;"ROSE IS HERE CHECKING THE INVENTORY."
+	ld a,61 ;"ROSE IS HERE CHECKING THE INVENTORY."
 	push af
 	push bc
 	ld a,21; rose

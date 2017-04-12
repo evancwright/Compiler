@@ -10,7 +10,7 @@ judoon_rule_event
 	push iy
 	nop ; test ((player.holder == lobby))
 	 ld a,14 ; lobby
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,1; player
@@ -25,10 +25,10 @@ judoon_rule_event
 	pop af
 	ld a,(ix)
 	cp b ; == lobby?
-	jp z,$a?
+	jp nz,$a?
 	nop ; test ((mannequin.holder != 0))
 	ld a,0
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,19; mannequin

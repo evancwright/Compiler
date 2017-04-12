@@ -29,7 +29,8 @@ read_note_sub
 	ld a,0
 	ld b,a ; put rhs in b
 	ld a,(readNote); readNote
-	jp z,$a?
+	cp b ; ==0?
+	jp nz,$a?
 	nop ; readNote = 1
 	nop ; add(score, 5)
 	push af

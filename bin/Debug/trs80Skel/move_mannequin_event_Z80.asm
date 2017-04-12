@@ -10,7 +10,7 @@ move_mannequin_event
 	push iy
 	nop ; test ((player.holder == 2nd floor))
 	 ld a,10 ; 2nd floor
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,1; player
@@ -25,11 +25,12 @@ move_mannequin_event
 	pop af
 	ld a,(ix)
 	cp b ; == 2nd floor?
-	jp z,$a?
+	jp nz,$a?
 	ld a,0
 	ld b,a ; put rhs in b
 	ld a,(mannequinMoved); mannequinMoved
-	jp z,$b?
+	cp b ; ==0?
+	jp nz,$b?
 	nop ; dalek.holder = inside tardis
 	 ld a,4 ;inside tardis
 	push af
@@ -74,7 +75,7 @@ move_mannequin_event
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,32 ; get open bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	nop ; tardis.lockable=0
@@ -92,7 +93,7 @@ move_mannequin_event
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,64 ; get lockable bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	nop ; mannequinMoved=1
@@ -126,7 +127,7 @@ move_mannequin_event
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,128 ; get locked bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	nop ; door.lockable = 0
@@ -144,11 +145,11 @@ move_mannequin_event
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,64 ; get lockable bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	nop ; mannequin.description = "THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
-	 ld a,-1 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
+	ld a,37 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
 	push af
 	push bc
 	ld a,19; mannequin
@@ -163,7 +164,7 @@ move_mannequin_event
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; mannequin.initial_description = "THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
-	 ld a,-1 ;"THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
+	ld a,38 ;"THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
 	push af
 	push bc
 	ld a,19; mannequin
@@ -179,7 +180,7 @@ move_mannequin_event
 	 ld (ix), a ; store rhs in lhs
 	nop ; test ((hat.holder == 1st floor))
 	 ld a,9 ; 1st floor
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,23; hat
@@ -194,9 +195,9 @@ move_mannequin_event
 	pop af
 	ld a,(ix)
 	cp b ; == 1st floor?
-	jp z,$c?
+	jp nz,$c?
 	nop ; hat.initial_description = "A STYLISH HAT LIES ON THE FLOOR."
-	 ld a,-1 ;"A STYLISH HAT LIES ON THE FLOOR."
+	ld a,39 ;"A STYLISH HAT LIES ON THE FLOOR."
 	push af
 	push bc
 	ld a,23; hat

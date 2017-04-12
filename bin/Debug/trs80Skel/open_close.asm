@@ -101,5 +101,44 @@ $f?	nop ; end else
 	pop af
 	ret
 
-;itslocked DB "IT'S LOCKED.",0h
+*MOD
+lock_sub
+		push af
+		push bc
+		push de
+		push ix
+		ld a,(sentence+1)
+		ld b,a
+		ld c, 19
+		call bmulc
+		ld ix,obj_table
+		add ix,bc ; jump to object
+		ld bc,PROPERTY_BYTE_2 ; get prop byte
+		add ix,bc ; jump to the object's byte we need
+		bit LOCKABLE_BIT,(ix) ; test openable prop bit
+		jp z,$nl?
+		bit LOCKED_BIT,(ix) ; test open prop bit
+		jp z,$al?
+		set LOCKED_BIT,(ix)
+		ld hl,done
+		call OUTLIN
+		call printcr
+$nl?	ld hl,notlockable
+		call OUTLIN
+		call printcr
+		jp $x?	
+$al?	ld hl,alreadylocked
+		call OUTLIN
+		call printcr
+$x?		pop ix
+		pop de
+		pop bc
+		pop af
+		ret	
+*MOD		
+unlock_sub
+	ret
+
+notlockable DB "THAT'S NOT LOCKABLE.",0h	
+alreadylocked DB "IT'S ALREADY LOCKED.",0h
 ;alreadyopen DB "IT'S ALREADY OPEN.",0h

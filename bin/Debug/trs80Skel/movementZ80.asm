@@ -4,6 +4,7 @@
 *MOD
 move_player
 		push bc
+		push de
 		push ix
 		;convert the verb to a direction
 		call get_player_room
@@ -11,6 +12,7 @@ move_player
 		call get_move_dir
 		ld c,a	;direction code
 		call get_obj_attr ; dir in 'a'->
+		ld d,a  ; save 'door' for later
 		cp 128	; ? is it positive or negative
 		jp m,$go?
 		neg		; flip accumulator (2's complement)
@@ -19,8 +21,7 @@ move_player
 		call print_table_entry
 		call printcr
 		jp $x?
-$go?
-		nop ; is 'a' a door?
+$go?	nop ; is 'a' a door?
 		ld e,a
 		ld b,a
 		ld c,DOOR
@@ -32,16 +33,24 @@ $go?
 		ld c,OPEN ; b still contains obj id
 		call get_obj_prop
 		cp 1	 		
-		jp z, $go2?	; not closed
-		ld hl,doorclosed
+		jp nz,$dc?	; not closed
+		nop ; load the door's  direction attr into 'a'
+		call get_move_dir ; dir in 'a'->
+		ld c,a  ; direction
+		call get_obj_attr ; dir in 'a'->
+		ld b,d   ; door
+		call get_obj_attr  ; get dir a leave in 'a'
+		jp $go2?
+$dc?	ld hl,doorclosed
 		call OUTLIN
 		call printcr
-		jp $x?
+		jp $x?	
 $go2?	ld b,PLAYER_ID		; move player to location
 		ld c,HOLDER_ID
 		call set_obj_attr	
 		call look_sub
 $x?		pop ix
+		pop de
 		pop bc
 		ret
 

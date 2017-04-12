@@ -34,9 +34,14 @@ $inp?	call QINPUT
 		jp z,$inp?
 		call encode
 		call run_sentence
+		call do_events
 		jp $inp?
 		ret
-	
+
+do_events
+*INCLUDE event_jumps_Z80.asm
+	ret
+		
 testtab
 		ld b,2d
 $inp1?	push bc

@@ -46,7 +46,7 @@ unlock_door_with_key_sub
 	pop af
 	ld b,(ix) ; get property byte
 	ld a,128 ; get locked bit
-	xor 1 ; flip bits
+	cpl ; flip bits
 	and b ; clear the bit
 	ld (ix),a ; write bits back 
 	pop iy

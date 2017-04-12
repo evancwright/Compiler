@@ -10,7 +10,7 @@ game_won_event
 	push iy
 	nop ; test ((player.holder == inside tardis))
 	 ld a,4 ; inside tardis
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,1; player
@@ -25,11 +25,12 @@ game_won_event
 	pop af
 	ld a,(ix)
 	cp b ; == inside tardis?
-	jp z,$a?
+	jp nz,$a?
 	ld a,3
 	ld b,a ; put rhs in b
 	ld a,(countDown); countDown
-	jp z,$b?
+	cp b ; ==3?
+	jp nz,$b?
 	nop ; println("CONGRATULATIONS!  WITH THE DALEK DESTROYED, YOU AND THE TARDIS ARE NOW READY FOR YOUR FURTHER ADVENTURES.")
 	push af
 	push ix

@@ -28,10 +28,10 @@ before_read_sub
 	pop bc ; end flags to a
 	ld b,1
 	cp b ; == 1 ?
-	jp z,$a?
+	jp nz,$a?
 	nop ; test (($dobj.holder != player))
 	 ld a,1 ; player
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,(sentence+1)

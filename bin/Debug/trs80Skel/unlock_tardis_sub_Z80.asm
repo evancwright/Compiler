@@ -10,7 +10,7 @@ unlock_tardis_sub
 	push iy
 	nop ; test ((sonic screwdriver.holder==player))
 	 ld a,1 ;player
-	ld b,a  ; move rhs in a
+	ld b,a  ; move rhs in b
 	push af
 	push bc
 	ld a,26; sonic screwdriver
@@ -25,7 +25,7 @@ unlock_tardis_sub
 	pop af
 	ld a,(ix)
 	cp b ; ==player?
-	jp z,$a?
+	jp nz,$a?
 	nop ; println("(WITH SONIC SCREWDRIVER)")
 	push af
 	push ix
