@@ -133,7 +133,7 @@ namespace XMLto6809
         protected bool IsAttribute(string attr)
         {
             return attrIndexes.Keys.Contains(attr);
-        }
+         }
 
         protected bool IsProperty(string attr)
         {
@@ -151,12 +151,12 @@ namespace XMLto6809
         protected abstract void WriteAddVar(StreamWriter sw, string code);
         protected abstract void WriteSetVar(StreamWriter sw, string code);
         protected abstract void WriteAttrTest( StreamWriter sw, string code, string objName, string attrName, int attrNum, string op, string val, string label);
-        public abstract void WriteCall(StreamWriter sw, string label);
         protected abstract void WriteVarTest(StreamWriter sw, string code, string varName, string op, string val, string label);
         protected abstract void WritePropTest(StreamWriter sw, string code, string objName, string propName, string op, int val, string label);
         protected abstract void WriteJump(StreamWriter sw, string label);
         protected abstract string GetNextLabel();
-
+        public abstract void WriteCall(StreamWriter sw, string label);
+        
         protected void SplitOnDot(string lhs, out string obj, out string attr)
         {
             int dot = lhs.IndexOf(".");

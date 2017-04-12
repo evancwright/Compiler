@@ -43,9 +43,9 @@ namespace XMLto6809
             
              //   sw.WriteLine("\tlda " + ToRegisterLoadOperand(val) + " ;" + val);
             //    sw.WriteLine("\tpshs a    ; push right side");
-            GetRHS(sw, val); // puts rhs in as 
-            sw.WriteLine("\tld b,a  ; move rhs in a");
-            WriteObjectAddrToIX(sw, objName, attrName);
+            GetRHS(sw, val); // puts rhs in a
+            sw.WriteLine("\tld b,a  ; move rhs in b");
+            WriteObjectAddrToIX(sw, objName, attrName); //preserves af,bc
             sw.WriteLine("\tld a,(ix)");
             sw.WriteLine("\tcp b ; ==" + val + "?");
             sw.WriteLine("\tjp " + OperatorToCC(op) + "," + label);
@@ -153,8 +153,8 @@ namespace XMLto6809
             {//clear bit ('or' x with mask)
                 WriteObjectAddrToIX(sw, obj, propName);
                 sw.WriteLine("\tld b,(ix) ; get property byte");
-                sw.WriteLine("\tld a," + propBits[propName] + " ; get " + propName + " bit");
-                sw.WriteLine("\txor 1 ; flip bits");
+                sw.WriteLine("\tld a," +  propBits[propName]+ " ; get " + propName + " bit");
+                sw.WriteLine("\tcpl ; flip bits");
                 sw.WriteLine("\tand b ; clear the bit" );
                 sw.WriteLine("\tld (ix),a ; write bits back ");
             }
@@ -173,6 +173,7 @@ namespace XMLto6809
             GetRHS(sw, val);
             sw.WriteLine("\tld b,a ; put rhs in b");
             GetRHS(sw, varName);
+            sw.WriteLine("\tcp b" + " ; " + op + val + "?");
             sw.WriteLine("\tjp " + OperatorToCC(op) + "," + label);
 
         }
@@ -181,10 +182,11 @@ namespace XMLto6809
         {
 
             WriteObjectAddrToIX(sw, objName, propName);
-            sw.WriteLine("\tbit " + GetBitPos(propName) + ",(ix) ; test prop bit");
+            sw.WriteLine("\tbit " + GetBitPos(propName) + ",(ix) ; test " + propName + " prop bit");
             WriteFlagsToA(sw);
-            for (int i=0;i<6;i++) 
+            for (int i=0;i < GetBitPos(propName);i++) 
                 sw.WriteLine("\tsrl a ; right justify z bit");
+            sw.WriteLine("\tld b," + val);
             sw.WriteLine("\tcp b ; == " + val + " ?");
             sw.WriteLine("\tjp " + OperatorToCC(op) +"," + label);
 
@@ -198,7 +200,11 @@ namespace XMLto6809
         //returns the CC flag for an operator (used to build the jump CC statement)
         public string OperatorToCC(string op)
         {
-            return "z";
+            if (op.Equals("=="))
+                return "nz";
+            if (op.Equals("!="))
+                return "z";
+            else return "OPERATOR " + op + " NOT IMPLEMENTED.";
         }
 
         //write code to put the rhs in register a
@@ -216,8 +222,8 @@ namespace XMLto6809
             else if (rhs.IndexOf("\"") == 0)
             {
                 string left = rhs.Substring(1);
-                string str = left.Substring(0, left.IndexOf("\"") - 1);
-                sw.WriteLine("\t ld a," + project.GetStringId(str).ToString() + " ;" + rhs);
+                string str = left.Substring(0, left.IndexOf("\""));
+                sw.WriteLine("\tld a," + project.GetStringId(str).ToString() + " ;" + rhs);
             }
             else if (rhs.IndexOf(".")!=-1)
             {
@@ -262,7 +268,7 @@ namespace XMLto6809
             if (project.IsVar(obj))
                 sw.WriteLine("\tld a,(" + project.GetVarAddr(obj) + ")" );
             else
-                sw.WriteLine("\tld a," + project.GetObjectId(obj));
+                sw.WriteLine("\tld a," + project.GetObjectId(obj) + "; " + obj);
             sw.WriteLine("\tld b,a");
             sw.WriteLine("\tld c, " + GameObject.SIZE);
             sw.WriteLine("\tcall bmulc");
