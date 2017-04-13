@@ -28,8 +28,10 @@ $lp?	ld a,(ix);get id
 		cp b
 		jp nz,$c?
 		ld a,(ix) ; reload obj id byte
+		push bc
 		ld b,a ; 
 		call z,print_obj ; look at id 'b'
+		pop bc
 $c?		add ix,de ; skip object
 		jp $lp?
 $x?		pop ix
@@ -45,6 +47,7 @@ $x?		pop ix
 print_obj_description
 	push af
 	push bc
+	push ix
 	ld c,INITIAL_DESC_ID
 	call get_obj_attr
 	cp 0ffh		
@@ -55,6 +58,7 @@ $x?	ld b,a
 	ld ix,string_table
 	call print_table_entry
 	call printcr
+	pop ix
 	pop bc
 	pop af
 	ret

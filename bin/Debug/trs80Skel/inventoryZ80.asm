@@ -62,7 +62,7 @@ has_contents
 		push de
 		push hl
 		push ix
-		ld d,a
+		ld h,a
 		ld b,0	; found flag
 		ld de,OBJ_ENTRY_SIZE
 		ld ix,obj_table
@@ -70,11 +70,11 @@ $lp?	ld a,(ix)
 		cp 0ffh
 		jp z,$x?
 		ld a,(ix+HOLDER_ID)
-		cp d
+		cp h
 		jp nz,$c?
 		bit SCENERY_BIT,(ix+PROPERTY_BYTE_1)  ; test scenery bit
 		jp nz,$c?
-		ld b,1
+		ld a,1
 		jp $x?
 $c?		add ix,de
 		jp $lp?
@@ -123,20 +123,14 @@ $x?		pop iy
 drop_sub
 		push af
 		push bc
-		push ix
-		push iy
-		call get_player_room
-		push af
 		ld a,(sentence+1)
 		ld b,a
 		ld c,HOLDER_ID
-		pop af
+		call get_player_room
 		call set_obj_attr
 		ld hl,dropped
 		call OUTLIN
 		call printcr
-		pop iy
-		pop ix
 		pop bc
 		pop af
 		ret
