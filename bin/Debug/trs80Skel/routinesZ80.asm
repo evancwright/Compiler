@@ -123,10 +123,12 @@ make_prop_mask
 
 ;player room in 'a'
 get_player_room
+		push bc
 		ld b,PLAYER_ID	
 		ld c,HOLDER_ID
 		call get_obj_attr
 		ld (player_room),a
+		pop bc
 		ret
 
 inside_closed_container

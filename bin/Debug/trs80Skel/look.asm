@@ -13,25 +13,25 @@ look_sub
 		ld h,a
 		call print_obj_description
 		nop ; now print all visible objects
-		call has_contents
-		cp 0
+ 		ld ix,obj_table
+$lp?	ld a,(ix);get id
+		cp 0		; skip offscreen
+		jp z,$c?
+		cp 1		; skip player
+		jp z,$c?
+		cp 0ffh
 		jp z,$x?
-		call print_contents
-;		ld ix,obj_table
-;$lp?	ld a,(ix);get id
-;		cp 0		; skip offscreen
-;		jp z,$c?
-;		cp 1		; skip player
-;		jp z,$c?
-;		cp 0ffh
-;		jp z,$x?
+		bit SCENERY_BIT,(ix+PROPERTY_BYTE_1)
+		jp nz,$c?
 ;		nop ; is this object in this room?
-;		ld b,a  ; put id byte in b for print_object
-;		ld a,(ix+1) ; get holder byte
-;		cp h		; compare to player's room (h)
-;		call z,print_obj ; look at id 'b'
-;$c?		add ix,de ; skip object
-;		jp $lp?
+		ld a,(ix+HOLDER) ; get holder byte
+		cp b
+		jp nz,$c?
+		ld a,(ix) ; reload obj id byte
+		ld b,a ; 
+		call z,print_obj ; look at id 'b'
+$c?		add ix,de ; skip object
+		jp $lp?
 $x?		pop ix
 		pop hl
 		pop de
@@ -44,6 +44,7 @@ $x?		pop ix
 *MOD
 print_obj_description
 	push af
+	push bc
 	ld c,INITIAL_DESC_ID
 	call get_obj_attr
 	cp 0ffh		
@@ -54,6 +55,7 @@ $x?	ld b,a
 	ld ix,string_table
 	call print_table_entry
 	call printcr
+	pop bc
 	pop af
 	ret
 	
