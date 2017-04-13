@@ -303,7 +303,7 @@ lkp_directobj
 		inc sp
 		jp print_ret_bad_do ; returns
 $_x?	ld b,a
-		call get_obj_id
+		call get_obj_id ; 'get the object with that word'
 		ld a,b
 		ld (sentence+1),a ; copy of b
 		pop iy
@@ -321,7 +321,7 @@ lkp_indirectobj
 		push af
 		ld ix,word4
 		ld iy,dictionary
-		call get_table_index
+		call get_table_index ; leave index in 'b'
 		ld a,b
 		cp 0ffh	 ; was it found
 		jp nz,$_x?
@@ -331,8 +331,10 @@ lkp_indirectobj
 		pop ix
 		inc sp
 		inc sp
-		jp print_ret_bad_io
-$_x?	ld (sentence+3),a
+		call print_ret_bad_io
+$_x?	call get_obj_id ; 'get the object with that word'
+		ld a,b
+		ld (sentence+3),a
 		pop af
 		pop iy
 		pop ix
