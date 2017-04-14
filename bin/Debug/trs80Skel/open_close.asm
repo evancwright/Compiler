@@ -72,10 +72,11 @@ close_sub
 	jp z,$a?
 	bit OPEN_BIT,(ix) ; test open prop bit
 	jp z,$b?
-	ld a,OPEN_BIT
-	cpl 
-	and (ix) ; and (ix) into acc
-	ld (ix),a
+	res OPEN_BIT,(ix)
+	;ld a,OPEN_BIT
+	;cpl 
+	;and (ix) ; and (ix) into acc
+	;ld (ix),a
 	ld hl,done
 	call OUTLIN	
 	call printcr ; newline

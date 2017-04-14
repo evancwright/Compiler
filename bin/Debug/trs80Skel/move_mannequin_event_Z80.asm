@@ -73,11 +73,7 @@ move_mannequin_event
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,32 ; get open bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 5,(ix) ; clr open bit
 	nop ; tardis.lockable=0
 	push af
 	push bc
@@ -91,11 +87,7 @@ move_mannequin_event
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,64 ; get lockable bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 6,(ix) ; clr lockable bit
 	nop ; mannequinMoved=1
 	nop ; mannequin.holder=inventory room
 	 ld a,12 ;inventory room
@@ -125,11 +117,7 @@ move_mannequin_event
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,128 ; get locked bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 7,(ix) ; clr locked bit
 	nop ; door.lockable = 0
 	push af
 	push bc
@@ -143,11 +131,7 @@ move_mannequin_event
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,64 ; get lockable bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 6,(ix) ; clr lockable bit
 	nop ; mannequin.description = "THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
 	ld a,37 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
 	push af

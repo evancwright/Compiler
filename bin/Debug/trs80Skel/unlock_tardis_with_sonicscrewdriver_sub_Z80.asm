@@ -21,21 +21,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	pop bc
 	pop af
 	bit 7,(ix) ; test locked prop bit
-	push bc ; flags to a
-	push af ; tfr flags to acc
-	pop bc
-	ld a,c ; get flags in acc 
-	pop bc ; end flags to a
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	ld b,1
-	cp b ; == 1 ?
-	jp nz,$a?
+	jp z,$a?
 	nop ; println("AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.")
 	push af
 	push ix
@@ -72,11 +58,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,128 ; get locked bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 7,(ix) ; clr locked bit
 	nop ; tardis.lockable=0
 	push af
 	push bc
@@ -90,11 +72,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,64 ; get lockable bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 6,(ix) ; clr lockable bit
 	jp $b? ; skip else 
 $a?	nop ; close (tardis.locked==1)
 	nop ; println("THE TARDIS IS ALREADY OPEN.")

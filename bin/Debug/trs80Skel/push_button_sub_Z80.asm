@@ -61,11 +61,11 @@ push_button_sub
 	 ld (ix), a ; store rhs in lhs
 	jp $b? ; skip else 
 $a?	nop ; close (elevator.e == lobby)
-	nop ; println("THE LIFT SLOWLY DESCENDS FLOOR.")
+	nop ; println("THE LIFT SLOWLY DESCENDS.")
 	push af
 	push ix
 	ld ix,string_table
-	ld b,68 ; THE LIFT SLOWLY DESCENDS FLOOR.
+	ld b,68 ; THE LIFT SLOWLY DESCENDS.
 	call print_table_entry
 	pop ix
 	pop af

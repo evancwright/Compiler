@@ -21,19 +21,7 @@ enter_tardis_sub
 	pop bc
 	pop af
 	bit 5,(ix) ; test open prop bit
-	push bc ; flags to a
-	push af ; tfr flags to acc
-	pop bc
-	ld a,c ; get flags in acc 
-	pop bc ; end flags to a
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	srl a ; right justify z bit
-	ld b,1
-	cp b ; == 1 ?
-	jp nz,$a?
+	jp z,$a?
 	nop ; player.holder = inside tardis
 	 ld a,4 ;inside tardis
 	push af

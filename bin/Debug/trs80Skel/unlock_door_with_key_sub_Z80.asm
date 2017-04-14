@@ -44,11 +44,7 @@ unlock_door_with_key_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,128 ; get locked bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 7,(ix) ; clr locked bit
 	pop iy
 	pop ix
 	pop hl

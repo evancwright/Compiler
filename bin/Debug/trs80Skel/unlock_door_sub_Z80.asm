@@ -62,11 +62,7 @@ unlock_door_sub
 	add ix,bc ; jump to the object's byte we need
 	pop bc
 	pop af
-	ld b,(ix) ; get property byte
-	ld a,128 ; get locked bit
-	cpl ; flip bits
-	and b ; clear the bit
-	ld (ix),a ; write bits back 
+	res 7,(ix) ; clr locked bit
 	jp $b? ; skip else 
 $a?	nop ; close (key.holder == player)
 	nop ; println("YOU NEED THE KEY.")

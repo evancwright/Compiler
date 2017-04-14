@@ -21,14 +21,7 @@ take_portable_sub
 	pop bc
 	pop af
 	bit 0,(ix) ; test portable prop bit
-	push bc ; flags to a
-	push af ; tfr flags to acc
-	pop bc
-	ld a,c ; get flags in acc 
-	pop bc ; end flags to a
-	ld b,1
-	cp b ; == 1 ?
-	jp nz,$a?
+	jp z,$a?
 	nop ; test (($dobj.holder != player))
 	 ld a,1 ; player
 	ld b,a  ; move rhs in b
