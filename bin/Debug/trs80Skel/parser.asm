@@ -271,16 +271,6 @@ store_word
 		pop bc
 		ret
 
-*MOD
-lkp_verb
-	call get_verbs_id 
-	cp 0ffh
-	jp nz,$x?
-	inc sp  ; return from caller
-	inc sp
-	jp print_ret_bad_verb
-$x?	ld (sentence),a ; store verb
-	ret		
 
 *MOD
 ;Checks to see that io and do were succesfully mapped
@@ -317,9 +307,18 @@ $x?		ret
 *MOD
 validate_words
 		ld a,255
+		ld (sentence),a
 		ld (doWordId),a
 		ld (ioWordId),a
-		ld a,(word2) ; is there a 1st word
+		nop ; there is always a verb
+		call get_verbs_id 
+		cp 0ffh
+		jp nz,$w1?
+		inc sp  ; return from caller
+		inc sp
+		jp print_ret_bad_verb
+$w1?	ld (sentence),a ; store verb
+		ld a,(word2) ; is there a 1st word?
 		cp 0
 		jp z,$x?
 		ld ix,word2
@@ -385,7 +384,6 @@ lkp_indirectobj
 ;tries to convert it to an object or verb id
 encode
 		push af
-		call lkp_verb  ; bails if not found
 		ld a,(word2) ; is the an d.o?
 		cp 0
 		jp z,$x?
