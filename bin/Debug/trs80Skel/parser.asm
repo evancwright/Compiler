@@ -281,34 +281,87 @@ lkp_verb
 	jp print_ret_bad_verb
 $x?	ld (sentence),a ; store verb
 	ret		
-		
+
 *MOD
-lkp_directobj
-		push af
-		push bc
-		push de
-		push ix
-		push iy
+;Checks to see that io and do were succesfully mapped
+;to visible objects.  This has to be done because the
+;parser may recognize a word, but it doesn't refer to
+;a visible object.
+;If validate fails, subroutine calls print_ret_dont_see
+;pops the stack and returns to the parsing loop
+*MOD
+validate_encode
+		ld a,(word2) ; is the word blank(null)
+		cp 0
+		jp z,$w4?
+		ld a,(sentence+1)
+		cp 255
+		jp nz,$x?
+		inc sp
+		inc sp
+		jp print_ret_dont_see
+$w4?	ld a,(word4)  ; is there an io?
+		cp 0
+		jp z,$x?
+		ld a,(sentence+1)
+		cp 255
+		jp nz,$x?
+		inc sp
+		inc sp
+		inc sp
+		inc sp
+		jp print_ret_dont_see	
+$x?		ret
+		
+;validates that the io and do exist in the tables		
+*MOD
+validate_words
+		ld a,255
+		ld (doWordId),a
+		ld (ioWordId),a
+		ld a,(word2) ; is there a 1st word
+		cp 0
+		jp z,$x?
 		ld ix,word2
 		ld iy,dictionary
 		call get_table_index ; result in a
 		ld a,b
+		ld (doWordId),a
 		cp 0ffh	 ; was it found
-		jp nz,$_x?
+		jp nz,$io?
 		nop ; look up obj and store it in sentence+1
-		pop af ; clean up stack for return jump
-		pop iy
-		pop ix
 		inc sp
 		inc sp
 		jp print_ret_bad_do ; returns
-$_x?	ld b,a
+		nop ; now validate io
+$io?	ld a,(word4) ; is there a 1st word
+		cp 0
+		jp z,$x?
+		ld ix,word4
+		ld iy,dictionary
+		call get_table_index ; result in a
+		ld a,b
+		ld (ioWordId),a
+		cp 0ffh	 ; was it found
+		jp nz,$x?
+		nop ; look up obj and store it in sentence+1
+		inc sp
+		inc sp
+		jp print_ret_bad_io ; returns
+$x?		ret		
+
+;attempts to find an object that matches the word
+;entered by the user.  If no visible objects match,
+;FF is returned.	
+*MOD
+lkp_directobj
+		push af
+		push bc
+		ld a,(doWordId)
+		ld b,a
 		call get_obj_id ; 'get the object with that word'
 		ld a,b
 		ld (sentence+1),a ; copy of b
-		pop iy
-		pop ix
-		pop de
 		pop bc
 		pop af
 		ret
@@ -316,47 +369,37 @@ $_x?	ld b,a
 		
 *MOD
 lkp_indirectobj
-		push ix
-		push iy
 		push af
-		ld ix,word4
-		ld iy,dictionary
-		call get_table_index ; leave index in 'b'
+		push bc
+		ld a,(ioWordId)
+		ld b,a
+		call get_obj_id ; 'get the object with that word'
 		ld a,b
-		cp 0ffh	 ; was it found
-		jp nz,$_x?
-		nop ; look up obj and store it in sentence+
-		pop af ; clean up stack for return jump
-		pop iy
-		pop ix
-		inc sp
-		inc sp
-		call print_ret_bad_io
-$_x?	call get_obj_id ; 'get the object with that word'
-		ld a,b
-		ld (sentence+3),a
+		ld (sentence+3),a ; copy of b
+		pop bc
 		pop af
-		pop iy
-		pop ix
 		ret
 
+;
 ;looks at each word in sentence and
 ;tries to convert it to an object or verb id
 encode
 		push af
 		call lkp_verb  ; bails if not found
-		ld a,(word2)
+		ld a,(word2) ; is the an d.o?
 		cp 0
 		jp z,$x?
 		call lkp_directobj
 		nop ; prep is already stored by parser
-		ld a,(word4)
+		ld a,(word4) ; is the an i.o?
 		cp 0
 		jp z,$x?
 		call lkp_indirectobj
 $x?		pop af
 		ret
-		
+	
+
+	
 DbgPF DB "DBG:PREP FOUND",0h		
 DbgSA DB "DBG:SKIPPING ARTICLE",0h		
 		
@@ -376,3 +419,6 @@ sentence DS 4
 
 prep_found DB 0
 parse_err DB 0
+
+doWordId DB 255
+ioWordId DB 255

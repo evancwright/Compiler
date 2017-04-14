@@ -28,16 +28,23 @@ loop
 		call printcr
 		call printcr
 		call look_sub
-$inp?	call QINPUT
-		call parse
+$inp?	call getcommand
+		jp $inp?
+		ret
+		
+getcommand
+		call QINPUT
+		call parse				; get the words
 		ld a,(sentence)
 		cp 0
 		jp z,$inp?
-		call encode
+		call validate_words		; make sure verb,io,do are in tables
+		call encode				; try to map words to objects
+		call validate_encode	; make sure it worked
 		call run_sentence
 		call do_events
-		jp $inp?
 		ret
+		
 
 do_events
 *INCLUDE event_jumps_Z80.asm
