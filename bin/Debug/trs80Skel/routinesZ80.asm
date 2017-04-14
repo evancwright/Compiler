@@ -134,19 +134,20 @@ get_player_room
 inside_closed_container
 		ret
 		
-;put 1 or 0 in a if c is a descendant of b		
+;put 1 or 0 in a if b is an ancestor of c		
 *MOD
-is_descendant_of
+b_ancestor_of_c
 		push bc
 		push de
 		ld d,b ; save parent
+		ld b,c ; child object
 		ld c,HOLDER_ID
 $lp?	call get_obj_attr ; puts holder in a
 		cp d	 	; ancestor found
 		jp z,$y?
 		cp 0		; hit top level - ancestor not found
 		jp z,$n?
-		ld b,a
+		ld b,a		; is b's parent (reg a) a descendant of c
 		jp $lp?
 $n?		ld a,0
 		jp $x?

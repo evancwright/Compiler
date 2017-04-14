@@ -108,6 +108,10 @@ $y?		nop; move to player
 		ld c,HOLDER_ID
 		ld a,PLAYER_ID
 		call set_obj_attr
+		nop ; clear initial description
+		ld c,INITIAL_DESC_ID
+		ld a,255
+		call set_obj_attr		
 		ld hl,taken
 		call OUTLIN
 		call printcr

@@ -87,6 +87,7 @@ print_space
 
 ;prints a space (registers are preserved)
 printcr
+	push af
 	push bc
 	push de
 	push iy
@@ -95,6 +96,7 @@ printcr
 	pop iy
 	pop de
 	pop bc
+	pop af
 	ret	
 
 ;get table index

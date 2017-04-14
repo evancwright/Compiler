@@ -9,9 +9,11 @@ look_sub
 		ld de,OBJ_ENTRY_SIZE
 		nop ; can the player see?
 		call get_player_room
+		call print_obj_name
+		call printcr
 		ld b,a
+		call print_obj_desc
 		ld h,a
-		call print_obj_description
 		nop ; now print all visible objects
  		ld ix,obj_table
 $lp?	ld a,(ix);get id
@@ -30,7 +32,7 @@ $lp?	ld a,(ix);get id
 		ld a,(ix) ; reload obj id byte
 		push bc
 		ld b,a ; 
-		call z,print_obj ; look at id 'b'
+		call z,list_object ; look at id 'b'
 		pop bc
 $c?		add ix,de ; skip object
 		jp $lp?
@@ -40,21 +42,14 @@ $x?		pop ix
 		pop bc
 		ret
 
-;prints the description for object in b
-;if the object has an 'initial description', then that is printed
-;otherwise, the 'description' string is printed
-*MOD
-print_obj_description
+;prints description of obj in 'b'
+print_obj_desc
 	push af
 	push bc
 	push ix
-	ld c,INITIAL_DESC_ID
-	call get_obj_attr
-	cp 0ffh		
-	jp nz,$x?			
-	ld c,DESC_ID	;no inital description, print regular one
-	call get_obj_attr
-$x?	ld b,a
+	ld c,DESC_ID
+	call get_obj_attr ; res to 'a'
+	ld b,a
 	ld ix,string_table
 	call print_table_entry
 	call printcr
@@ -62,14 +57,36 @@ $x?	ld b,a
 	pop bc
 	pop af
 	ret
+		
+;prints the initial description for object in b
+;if it has one. Otherwise it defaults to "THERE IS A ____ HERE"
+*MOD
+list_object
+	push af
+	push bc
+	push ix
+	ld c,INITIAL_DESC_ID
+	call get_obj_attr 
+	cp 0ffh		
+	jp z,$n?			
+	ld b,a
+	ld ix,string_table
+	call print_table_entry ; uses b and ix
+	call printcr
+	jp $x? 
+$n?	ld hl,thereisa
+    call OUTLIN
+;	ld b,a
+	call print_obj_name
+	ld hl,here
+	call OUTLIN
+	call printcr
+$x?	pop ix
+	pop bc
+	pop af
+	ret
 	
-;obj id is in b
-print_obj
-		push bc
-		call print_obj_description ;takes param in b
-		nop ; print contents
-		pop bc
-		ret
+
 		
 ;player has light	
 ;player has light result in 'a'
@@ -97,7 +114,7 @@ $lp?	ld a,(ix) ;and not inside a closed container return true
 		ld b,a
 		pop af
 		ld c,a ; object id
-		call is_descendant_of ; is it a in same room as player
+		call b_ancestor_of_c ; is it a in same room as player
 		cp 0	
 		jp z,$skp?	; if it's not 'lit' we don't care about it
 		nop ; need to set up args
@@ -137,5 +154,6 @@ look_at_sub
 		ret
 		
 visobjs DB 0		
-		
+thereisa DB  "THERE IS A ",0h
+here DB " HERE.",0h		
 	

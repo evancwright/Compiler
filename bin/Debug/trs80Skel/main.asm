@@ -26,6 +26,7 @@ loop
 		ld hl,version
 		call OUTLIN
 		call printcr
+		call printcr
 		call look_sub
 $inp?	call QINPUT
 		call parse
