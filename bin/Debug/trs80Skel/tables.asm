@@ -131,25 +131,34 @@ $_x?	pop de
 ;returns the object id for the object whose
 ;'word' is supplied in b
 ;the value replaces the parameter
+;only visible objects will be considered
 ;c is clobbered
 *MOD
 get_obj_id
 		push af
+		push de
 		push ix
+		ld d,b ; word id to 'd'
+		call get_player_room
+		ld b,a ; save it in b
 		ld ix,obj_word_table
 $lp?	ld a,(ix)	; hit end of table?
 		cp 255
 		jp z,$nf?
+		ld c,a ; the current object
+		call b_ancestor_of_c  ; reslt->a. Note this should really check visibility
+		cp 0
+		jp z,$c?    ; can't see it - go to next obj
 		ld a,(ix+1)	;  get word entry
-		cp b		;  equal to supplied word?
+		cp d		;  equal to supplied word?
 		jp z, $_y?
 		ld a,(ix+2)		; get lp counter
-		cp b		;  equal to supplied word?
+		cp d		;  equal to supplied word?
 		jp z, $_y?
 		ld a,(ix+3)	;get object's word entry
-		cp b		;  equal to supplied word?
+		cp d		;  equal to supplied word?
 		jp z, $_y?
-		inc ix		; not found. increment ix
+$c?		inc ix		; not found. increment ix to next entry
 		inc ix		
 		inc ix		
 		inc ix		
@@ -158,6 +167,7 @@ $_y?	ld b,(ix)	; they match! back up put the id in b
 		jp $_x?
 $nf?	ld b,255 	; not found code
 $_x?	pop ix
+		pop de
 		pop af
 		ret
 

@@ -313,11 +313,11 @@ validate_words
 		nop ; there is always a verb
 		call get_verbs_id 
 		cp 0ffh
-		jp nz,$w1?
+		jp nz,$do?
 		inc sp  ; return from caller
 		inc sp
 		jp print_ret_bad_verb
-$w1?	ld (sentence),a ; store verb
+$do?	ld (sentence),a ; store verb
 		ld a,(word2) ; is there a 1st word?
 		cp 0
 		jp z,$x?

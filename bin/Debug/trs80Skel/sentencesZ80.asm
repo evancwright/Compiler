@@ -1,7 +1,7 @@
 ;sentences running routines
 *MOD
 run_sentence
-		;run checks (these return if not met)
+		;run checks (these return if not met)		
 		;return before
 		ld ix,preactions_table
 		call run_actions
