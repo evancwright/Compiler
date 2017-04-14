@@ -75,8 +75,10 @@ list_object
 	call printcr
 	jp $x? 
 $n?	ld hl,thereisa
+	push bc
     call OUTLIN
-;	ld b,a
+	pop bc
+	ld a,b
 	call print_obj_name
 	ld hl,here
 	call OUTLIN
@@ -155,5 +157,5 @@ look_at_sub
 		
 visobjs DB 0		
 thereisa DB  "THERE IS A ",0h
-here DB " HERE.",0h		
+here DB "HERE.",0h		
 	

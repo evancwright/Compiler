@@ -34,7 +34,7 @@ _x	pop ix
 	ret
 
 ;prints the name of the object whose
-;id is supplied in register a
+;id is supplied in register 'a'
 *MOD
 print_obj_name
 		push af
