@@ -34,6 +34,7 @@ obj_word_table
 	DB 28,48,255,255   ;   TRENZALORE
 	DB 29,28,23,255   ;   ROSE'S DOOR
 	DB 30,49,255,255   ;   KEY
+	DB 31,50,255,255   ;   TRAFFIC
 	DB 0,-1,255,255   ;   synonyms for OFFSCREEN
 	DB 1,2,3,255   ;   synonyms for PLAYER
 	DB 3,7,8,9   ;   synonyms for TARDIS
@@ -44,4 +45,4 @@ obj_word_table
 	DB 27,45,46,47   ;   synonyms for EYESTALK
 	DB 28,-1,255,255   ;   synonyms for TRENZALORE
 	DB 255
-obj_table_size	DB 31
+obj_table_size	DB 32

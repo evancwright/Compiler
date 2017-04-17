@@ -44,7 +44,7 @@ before_read_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,55 ; (TAKEN)
+	ld b,57 ; (TAKEN)
 	call print_table_entry
 	pop ix
 	pop af

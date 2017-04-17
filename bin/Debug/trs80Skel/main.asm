@@ -1,21 +1,15 @@
 ;main file for trs-80 shell
  
-*INCLUDE objdefsZ80.asm
+*INCLUDE objdefsZ80.asm ; equs
  
-QINPUT equ 1bb3h
+;QINPUT equ 1bb3h		; ROM ROUTINES
 CRTBYTE equ  0033H
 INBUF equ 41e8h
 CLS equ 01c9h
-OUTLIN equ 28a7h		; src str in HL/
+;OUTLIN equ 28a7h		; src str in HL/
 
-	; #include "WeclomeZ80.asm"
-
-;header DB 01h,02h,00h,50h ; header for MAME testing (remove later)
-;START  
-	ORG 5000H
-
-main
-loop
+	ORG 5200H
+START
 		call CLS
 		ld hl,welcome ; print welcome,author,version
 		call OUTLIN
@@ -33,7 +27,8 @@ $inp?	call getcommand
 		ret
 		
 getcommand
-		call QINPUT
+		;call QINPUT
+		call getlin
 		call parse				; get the words
 		ld a,(sentence)
 		cp 0
@@ -49,21 +44,8 @@ getcommand
 do_events
 *INCLUDE event_jumps_Z80.asm
 	ret
-		
-testtab
-		ld b,2d
-$inp1?	push bc
-		call QINPUT
-		pop bc
-		;ld ix, string_table
-		;call print_table_entry
-		ld a,b
-		call print_obj_name
-		call printcr
-		inc b
-		jp $inp1?
-		ret
 	
+*INCLUDE io.asm	
 *INCLUDE parser.asm
 *INCLUDE look.asm
 *INCLUDE tables.asm
@@ -96,5 +78,7 @@ $inp1?	push bc
 *INCLUDE WelcomeZ80.asm
 *INCLUDE UserVarsZ80.asm
 score DB 0
-	END 5000H
-END
+gameOver DB 0
+
+	END START
+;END

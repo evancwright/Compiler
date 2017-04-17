@@ -12,7 +12,7 @@ listen_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,50 ; YOU HEAR NOTHING UNEXPECTED.
+	ld b,52 ; YOU HEAR NOTHING UNEXPECTED.
 	call print_table_entry
 	pop ix
 	pop af

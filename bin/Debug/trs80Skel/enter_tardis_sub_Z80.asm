@@ -45,7 +45,7 @@ $a?	nop ; close (tardis.open == 1)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,65 ; THE TARDIS IS CLOSED.
+	ld b,67 ; THE TARDIS IS CLOSED.
 	call print_table_entry
 	pop ix
 	pop af

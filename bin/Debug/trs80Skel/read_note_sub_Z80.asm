@@ -12,7 +12,7 @@ read_note_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,56 ; THE NOTE READS...
+	ld b,58 ; THE NOTE READS...
 	call print_table_entry
 	pop ix
 	pop af
@@ -21,7 +21,7 @@ read_note_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,57 ; 'DEAR DR., I STILL HAVE YOUR SONIC SCREWDRIVER. SERIOUSLY, YOU CAN BE SO FORGETFUL SOMETIMES.'
+	ld b,59 ; 'DEAR DR., I STILL HAVE YOUR SONIC SCREWDRIVER. SERIOUSLY, YOU CAN BE SO FORGETFUL SOMETIMES.'
 	call print_table_entry
 	pop ix
 	pop af

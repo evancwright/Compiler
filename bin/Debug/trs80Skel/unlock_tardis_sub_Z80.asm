@@ -30,7 +30,7 @@ unlock_tardis_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,72 ; (WITH SONIC SCREWDRIVER)
+	ld b,74 ; (WITH SONIC SCREWDRIVER)
 	call print_table_entry
 	pop ix
 	pop af
@@ -42,7 +42,7 @@ $a?	nop ; close (sonic screwdriver.holder==player)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,73 ; YOU HAVE NOTHING TO UNLOCK IT WITH.
+	ld b,75 ; YOU HAVE NOTHING TO UNLOCK IT WITH.
 	call print_table_entry
 	pop ix
 	pop af

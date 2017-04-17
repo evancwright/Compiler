@@ -26,7 +26,7 @@ unlock_tardis_with_sonicscrewdriver_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,70 ; AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.
+	ld b,72 ; AFTER SOME CLICKS AND BUZZES, THE TARDIS POPS OPEN.
 	call print_table_entry
 	pop ix
 	pop af
@@ -79,7 +79,7 @@ $a?	nop ; close (tardis.locked==1)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,71 ; THE TARDIS IS ALREADY OPEN.
+	ld b,73 ; THE TARDIS IS ALREADY OPEN.
 	call print_table_entry
 	pop ix
 	pop af

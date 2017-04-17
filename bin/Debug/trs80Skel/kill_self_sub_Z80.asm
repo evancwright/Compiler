@@ -12,7 +12,7 @@ kill_self_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,47 ; IF YOU ARE EXPERIENCING SUICIDAL THOUGHTS, YOU SHOULD SEEK PHSYCIATRIC HELP.
+	ld b,49 ; IF YOU ARE EXPERIENCING SUICIDAL THOUGHTS, YOU SHOULD SEEK PHSYCIATRIC HELP.
 	call print_table_entry
 	pop ix
 	pop af

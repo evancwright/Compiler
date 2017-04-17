@@ -12,7 +12,7 @@ kill_player_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,48 ; ***YOU HAVE DIED***.
+	ld b,50 ; ***YOU HAVE DIED***.
 	call print_table_entry
 	pop ix
 	pop af

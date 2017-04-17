@@ -153,4 +153,7 @@ dictionary
 	DB 3
 	DB "KEY" ; 49
 	DB 0 ; null terminator
+	DB 7
+	DB "TRAFFIC" ; 50
+	DB 0 ; null terminator
 	DB 255 ; end of table

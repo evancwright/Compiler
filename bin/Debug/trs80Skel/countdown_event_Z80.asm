@@ -33,7 +33,7 @@ countdown_event
 	push af
 	push ix
 	ld ix,string_table
-	ld b,40 ; AS THE SELF DESTRUCT ACTIVATES, THE DALEK IS SHATTERED BY A POWERFUL INTERNAL EXPLOSION.
+	ld b,42 ; AS THE SELF DESTRUCT ACTIVATES, THE DALEK IS SHATTERED BY A POWERFUL INTERNAL EXPLOSION.
 	call print_table_entry
 	pop ix
 	pop af
@@ -75,7 +75,7 @@ countdown_event
 	push af
 	push ix
 	ld ix,string_table
-	ld b,41 ; THE MASSIVE CONCUSSSION, TRAPPED INSIDE THE TARDIS, KILLS YOU INSTANTLY.
+	ld b,43 ; THE MASSIVE CONCUSSSION, TRAPPED INSIDE THE TARDIS, KILLS YOU INSTANTLY.
 	call print_table_entry
 	pop ix
 	pop af

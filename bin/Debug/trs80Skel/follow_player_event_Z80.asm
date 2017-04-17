@@ -35,7 +35,7 @@ follow_player_event
 	push af
 	push ix
 	ld ix,string_table
-	ld b,42 ; THE DALEK IS FOLLOWING YOU.
+	ld b,44 ; THE DALEK IS FOLLOWING YOU.
 	call print_table_entry
 	pop ix
 	pop af

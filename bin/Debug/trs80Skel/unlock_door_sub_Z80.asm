@@ -30,7 +30,7 @@ unlock_door_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,78 ; THE DOOR IS NOW UNLOCKED
+	ld b,80 ; THE DOOR IS NOW UNLOCKED
 	call print_table_entry
 	pop ix
 	pop af
@@ -69,7 +69,7 @@ $a?	nop ; close (key.holder == player)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,79 ; YOU NEED THE KEY.
+	ld b,81 ; YOU NEED THE KEY.
 	call print_table_entry
 	pop ix
 	pop af

@@ -30,7 +30,7 @@ push_button_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,66 ; THE LIFT SLOWLY RISES TO THE UPPER FLOOR.
+	ld b,68 ; THE LIFT SLOWLY RISES TO THE UPPER FLOOR.
 	call print_table_entry
 	pop ix
 	pop af
@@ -39,7 +39,7 @@ push_button_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,67 ; THE DOOR OPENS, LEADING EAST TO A HALLWAY.
+	ld b,69 ; THE DOOR OPENS, LEADING EAST TO A HALLWAY.
 	call print_table_entry
 	pop ix
 	pop af
@@ -65,7 +65,7 @@ $a?	nop ; close (elevator.e == lobby)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,68 ; THE LIFT SLOWLY DESCENDS.
+	ld b,70 ; THE LIFT SLOWLY DESCENDS.
 	call print_table_entry
 	pop ix
 	pop af
@@ -74,7 +74,7 @@ $a?	nop ; close (elevator.e == lobby)
 	push af
 	push ix
 	ld ix,string_table
-	ld b,69 ; THE DOOR OPENS, LEADING EAST TO THE LOBBY.
+	ld b,71 ; THE DOOR OPENS, LEADING EAST TO THE LOBBY.
 	call print_table_entry
 	pop ix
 	pop af

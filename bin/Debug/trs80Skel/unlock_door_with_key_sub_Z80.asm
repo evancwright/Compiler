@@ -12,7 +12,7 @@ unlock_door_with_key_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,78 ; THE DOOR IS NOW UNLOCKED
+	ld b,80 ; THE DOOR IS NOW UNLOCKED
 	call print_table_entry
 	pop ix
 	pop af

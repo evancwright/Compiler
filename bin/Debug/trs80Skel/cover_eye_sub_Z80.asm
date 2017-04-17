@@ -12,7 +12,7 @@ cover_eye_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,74 ; YOU DEFTLY TOSS THE FEDORA ONTO THE DALEK'S EYESTALK.
+	ld b,76 ; YOU DEFTLY TOSS THE FEDORA ONTO THE DALEK'S EYESTALK.
 	call print_table_entry
 	pop ix
 	pop af
@@ -21,7 +21,7 @@ cover_eye_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,75 ; IN AN ATTEMPT TO DESTROY THE HAT, THE DALEK FIRES A LASER AT IT,  ACCIDENTALLY VAPORIZING ITS OWN EYE.
+	ld b,77 ; IN AN ATTEMPT TO DESTROY THE HAT, THE DALEK FIRES A LASER AT IT,  ACCIDENTALLY VAPORIZING ITS OWN EYE.
 	call print_table_entry
 	pop ix
 	pop af
@@ -30,7 +30,7 @@ cover_eye_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,76 ; 'IMPOSSIBLE! IMPOSSIBLE! MUST DESTROY IMPERFECTION!'
+	ld b,78 ; 'IMPOSSIBLE! IMPOSSIBLE! MUST DESTROY IMPERFECTION!'
 	call print_table_entry
 	pop ix
 	pop af
@@ -39,7 +39,7 @@ cover_eye_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,77 ; THE DALEK, HAVING ACTIVATED A SELF DESTRUCT MECHANISM IS NOW GLOWING BRIGHT RED.
+	ld b,79 ; THE DALEK, HAVING ACTIVATED A SELF DESTRUCT MECHANISM IS NOW GLOWING BRIGHT RED.
 	call print_table_entry
 	pop ix
 	pop af

@@ -12,7 +12,7 @@ read_anything_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,64 ; THERE IS NOTHING TO READ ON THAT.
+	ld b,66 ; THERE IS NOTHING TO READ ON THAT.
 	call print_table_entry
 	pop ix
 	pop af

@@ -133,7 +133,7 @@ move_mannequin_event
 	pop af
 	res 6,(ix) ; clr lockable bit
 	nop ; mannequin.description = "THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
-	ld a,37 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
+	ld a,39 ;"THE MANNEQUIN IS OBVIOUSLY ALIVE AND VERY DANGEROUS."
 	push af
 	push bc
 	ld a,19; mannequin
@@ -148,7 +148,7 @@ move_mannequin_event
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; mannequin.initial_description = "THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
-	ld a,38 ;"THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
+	ld a,40 ;"THE MANNEQUIN IS STANDING OVER ROSE'S BODY."
 	push af
 	push bc
 	ld a,19; mannequin
@@ -181,7 +181,7 @@ move_mannequin_event
 	cp b ; == 1st floor?
 	jp nz,$c?
 	nop ; hat.initial_description = "A STYLISH HAT LIES ON THE FLOOR."
-	ld a,39 ;"A STYLISH HAT LIES ON THE FLOOR."
+	ld a,41 ;"A STYLISH HAT LIES ON THE FLOOR."
 	push af
 	push bc
 	ld a,23; hat

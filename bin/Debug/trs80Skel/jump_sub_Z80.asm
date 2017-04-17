@@ -12,7 +12,7 @@ jump_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,54 ; WHEEE!
+	ld b,56 ; WHEEE!
 	call print_table_entry
 	pop ix
 	pop af

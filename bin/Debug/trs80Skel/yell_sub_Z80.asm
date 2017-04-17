@@ -12,7 +12,7 @@ yell_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,53 ; AAAAAAAAAAAAARRRRGGGGGG!
+	ld b,55 ; AAAAAAAAAAAAARRRRGGGGGG!
 	call print_table_entry
 	pop ix
 	pop af

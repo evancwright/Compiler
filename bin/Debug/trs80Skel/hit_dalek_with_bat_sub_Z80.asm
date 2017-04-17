@@ -12,7 +12,7 @@ hit_dalek_with_bat_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,63 ; TBD
+	ld b,65 ; TBD
 	call print_table_entry
 	pop ix
 	pop af

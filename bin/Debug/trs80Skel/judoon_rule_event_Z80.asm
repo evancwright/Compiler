@@ -48,7 +48,7 @@ judoon_rule_event
 	push af
 	push ix
 	ld ix,string_table
-	ld b,43 ; AS YOU ENTER THE LOBBY, A HULKING JUDOON WALKS BY, KNOCKING YOU BACK OUTSIDE.
+	ld b,45 ; AS YOU ENTER THE LOBBY, A HULKING JUDOON WALKS BY, KNOCKING YOU BACK OUTSIDE.
 	call print_table_entry
 	pop ix
 	pop af

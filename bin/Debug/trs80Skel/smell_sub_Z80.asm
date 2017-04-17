@@ -12,7 +12,7 @@ smell_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,51 ; YOU SMELL NOTHING UNEXPECTED.
+	ld b,53 ; YOU SMELL NOTHING UNEXPECTED.
 	call print_table_entry
 	pop ix
 	pop af

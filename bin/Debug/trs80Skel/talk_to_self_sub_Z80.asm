@@ -12,7 +12,7 @@ talk_to_self_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,49 ; TALKING TO YOURSELF IS A SIGN OF IMPENDING MENTAL COLLAPSE.
+	ld b,51 ; TALKING TO YOURSELF IS A SIGN OF IMPENDING MENTAL COLLAPSE.
 	call print_table_entry
 	pop ix
 	pop af

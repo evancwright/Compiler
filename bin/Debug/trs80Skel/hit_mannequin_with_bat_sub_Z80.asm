@@ -12,7 +12,7 @@ hit_mannequin_with_bat_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,59 ; WITH A PRECISE BLOW, YOU NEATLY DECAPITATE THE MANNEQUIN.
+	ld b,61 ; WITH A PRECISE BLOW, YOU NEATLY DECAPITATE THE MANNEQUIN.
 	call print_table_entry
 	pop ix
 	pop af
@@ -21,7 +21,7 @@ hit_mannequin_with_bat_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,60 ; ROSE STAGGERS TO HER FEET.
+	ld b,62 ; ROSE STAGGERS TO HER FEET.
 	call print_table_entry
 	pop ix
 	pop af
@@ -72,7 +72,7 @@ hit_mannequin_with_bat_sub
 	pop af
 	 ld (ix), a ; store rhs in lhs
 	nop ; rose.initial_description = "ROSE IS HERE CHECKING THE INVENTORY."
-	ld a,61 ;"ROSE IS HERE CHECKING THE INVENTORY."
+	ld a,63 ;"ROSE IS HERE CHECKING THE INVENTORY."
 	push af
 	push bc
 	ld a,21; rose
@@ -96,7 +96,7 @@ hit_mannequin_with_bat_sub
 	push af
 	push ix
 	ld ix,string_table
-	ld b,62 ; ROSE HANDS YOU THE KEY TO HER FLAT.
+	ld b,64 ; ROSE HANDS YOU THE KEY TO HER FLAT.
 	call print_table_entry
 	pop ix
 	pop af
