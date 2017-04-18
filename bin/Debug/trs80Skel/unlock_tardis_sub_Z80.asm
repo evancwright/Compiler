@@ -36,6 +36,7 @@ unlock_tardis_sub
 	pop af
 	call printcr ; newline
 	nop ; call unlock_tardis_with_sonicscrewdriver()
+	call unlock_tardis_with_sonicscrewdriver
 	jp $b? ; skip else 
 $a?	nop ; close (sonic screwdriver.holder==player)
 	nop ; println("YOU HAVE NOTHING TO UNLOCK IT WITH.")

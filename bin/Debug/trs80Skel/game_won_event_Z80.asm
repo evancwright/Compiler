@@ -64,6 +64,10 @@ game_won_event
 	pop af
 	call printcr ; newline
 	nop ; $gameOver=1
+	nop ; this code hasn't been tested.
+	ld a,1
+	ld ix, gameOver; $gameOver
+	 ld (ix), a ; store rhs in lhs
 $c?	nop ; close (countDown == 3)
 $b?	nop ; close (player.holder == inside tardis)
 $a?	nop ; close ($gameOver==0)

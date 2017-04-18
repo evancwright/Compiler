@@ -32,6 +32,10 @@ read_note_sub
 	cp b ; ==0?
 	jp nz,$a?
 	nop ; readNote = 1
+	nop ; this code hasn't been tested.
+	ld a,1
+	ld ix, readNote; readNote
+	 ld (ix), a ; store rhs in lhs
 	nop ; add(score, 5)
 	push af
 	ld a,(score) ; get val of score

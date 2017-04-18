@@ -89,6 +89,10 @@ move_mannequin_event
 	pop af
 	res 6,(ix) ; clr lockable bit
 	nop ; mannequinMoved=1
+	nop ; this code hasn't been tested.
+	ld a,1
+	ld ix, mannequinMoved; mannequinMoved
+	 ld (ix), a ; store rhs in lhs
 	nop ; mannequin.holder=inventory room
 	 ld a,12 ;inventory room
 	push af

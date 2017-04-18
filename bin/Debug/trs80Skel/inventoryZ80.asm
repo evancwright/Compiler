@@ -102,7 +102,18 @@ get_sub
 		call OUTLIN
 		call printcr
 		jp $x? 
-$y?		nop; move to player
+$y?		nop ; is it a child of the player already?
+		ld a,(sentence+1)
+		ld c,a
+		ld b,PLAYER_ID
+		call b_ancestor_of_c
+		cp 0
+		jp z,$y1?
+		ld hl,alreadyhave
+		call OUTLIN
+		call printcr
+		jp $x?
+$y1?	nop; move to player
 		ld a,(sentence+1)  ; get dobj
 		ld b,a
 		ld c,HOLDER_ID
@@ -127,7 +138,18 @@ $x?		pop iy
 drop_sub
 		push af
 		push bc
+		nop ; does player have it
 		ld a,(sentence+1)
+		ld c,a
+		ld b,PLAYER_ID
+		call b_ancestor_of_c
+		cp 1
+		jp z,$y?
+		ld hl,donthave
+		call OUTLIN
+		call printcr
+		jp $x?
+$y?		ld a,(sentence+1)
 		ld b,a
 		ld c,HOLDER_ID
 		call get_player_room
@@ -135,7 +157,7 @@ drop_sub
 		ld hl,dropped
 		call OUTLIN
 		call printcr
-		pop bc
+$x?		pop bc
 		pop af
 		ret
 
@@ -178,3 +200,4 @@ carrying DB "YOU ARE CARRYING:",0h
 onitis DB "ON IT IS...",0h;
 initis DB "IN IT IS...",0h;
 notportable DB "YOU CAN'T PICK THAT UP.",0h
+alreadyhave DB "YOU ALREADY HAVE THAT.",0h
