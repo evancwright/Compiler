@@ -2,6 +2,25 @@
 *MOD
 run_sentence
 		;run checks (these return if not met)		
+		ld ix,check_table
+$lp?	ld a,(ix)
+		cp 255
+		jp z,$d?
+		ld a,(sentence)
+		cp (ix) ; compare to verb
+		jp nz,$c?
+		inc ix
+		ld hl,$nxt?
+		push hl  ; "call" to check rountine
+		ld l,(ix)
+		ld h,(ix+1)
+		jp (hl)
+$nxt?	dec ix
+$c?		inc ix	; skip to next entry
+		inc ix
+		inc ix
+		jp $lp?
+$d?		nop;
 		;return before
 		ld ix,preactions_table
 		call run_actions

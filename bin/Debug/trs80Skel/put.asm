@@ -32,6 +32,10 @@ $po?	nop ; is do a supporter?
 		bit SUPPORTER_BIT,(ix)
 		jp z,$ns?
 		jp $mv?
+		nop ; check nested containership
+		call check_nested_containership
+		cp 1  ; 1 = invalid (message was printed)
+		jp z,$x?
 $mv?    ld c,HOLDER
 		ld a,(sentence+3)
 		call set_obj_attr
@@ -51,6 +55,10 @@ $nc?	ld hl,notcontainer
 		call OUTLIN
 		call printcr		
 		jp $x?
+$np?    ld hl,impossible
+		call OUTLIN
+		call printcr		
+		jp $x?;		
 $ns?	ld hl,notsupporter
 		call OUTLIN
 		call printcr		
@@ -64,3 +72,4 @@ closed DB "IT IS CLOSED.",0h
 badput DB "TRY: PUT SOMETHING IN/ON SOMETHING ELSE.",0h	
 notcontainer DB "YOU CAN'T PUT THINGS IN THAT.",0h
 notsupporter DB "YOU FIND NO SUITABLE SURFACE.",0h
+impossible DB "THAT'S NOT PHYSICALLY POSSIBLE.",0h
