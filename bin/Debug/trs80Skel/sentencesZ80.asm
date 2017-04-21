@@ -155,7 +155,7 @@ wildcardize
 $n?	nop ; repeat for io
 	ld a,255		;store io
 	ld (wildcards+3),a
-	ld (sentence+3),a
+	ld a,(sentence+3)
 	cp 255			;was do blank?
 	jp z,$o?
 	ld a,ANY_OBJECT ;no, store '*'
