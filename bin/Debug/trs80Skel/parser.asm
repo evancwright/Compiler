@@ -283,10 +283,10 @@ store_word
 validate_encode
 		ld a,(word2) ; is the word blank(null)
 		cp 0
-		jp z,$w4?
+		jp z,$x?
 		ld a,(sentence+1)
 		cp 255
-		jp nz,$x?
+		jp nz,$w4?
 		inc sp
 		inc sp
 		jp print_ret_dont_see
@@ -296,8 +296,6 @@ $w4?	ld a,(word4)  ; is there an io?
 		ld a,(sentence+3)
 		cp 255
 		jp nz,$x?
-		inc sp
-		inc sp
 		inc sp
 		inc sp
 		jp print_ret_dont_see	
