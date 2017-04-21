@@ -293,7 +293,7 @@ validate_encode
 $w4?	ld a,(word4)  ; is there an io?
 		cp 0
 		jp z,$x?
-		ld a,(sentence+1)
+		ld a,(sentence+3)
 		cp 255
 		jp nz,$x?
 		inc sp
