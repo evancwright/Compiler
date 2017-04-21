@@ -38,15 +38,32 @@ $d?		nop;
 ;actions table in ix
 ;post condition: action_run = 1
 ;if a sentence was run
+
 *MOD
 run_actions
+	push ix
+	push iy
+	ld iy,sentence
+	call run_actions_
+	ld a,(action_run)
+	cp 1
+	jp z,$x?
+	ld iy,wildcards
+	call run_actions_	
+$x?	pop iy
+	pop ix
+	ret
+
+*MOD
+run_actions_
 		push bc
 		push de
 		push hl
+		push ix 
 		push iy 
 		ld a,0				; clear flag
 		ld (action_run),a
-		ld iy,sentence
+;		ld iy,sentence
 		ld de,6 	;size of entry
 @lp?	ld a,(ix)	; load verb from table
 		cp 0ffh		; hit end of table
@@ -78,10 +95,11 @@ run_actions
 		jp (hl)			; return will pop stack
 $nxt?	ld a,1
 		ld (action_run),a
-		jp $x?
+		jp $x?				; done 
 $c?		add ix,de			; skip to next entry 
 		jp @lp?
 $x?		pop iy
+		pop ix
 		pop hl
 		pop de
 		pop bc
@@ -119,6 +137,29 @@ $x?		pop hl
 		pop de
 		pop bc
 		ret
-		
-run_events
-		ret
+
+;replaces io and do with 254 (ANY_OBJECT)
+*MOD		
+wildcardize
+	ld a,(sentence) ; copy verb
+	ld (wildcards),a
+	ld a,(sentence+2) ; copy prep
+	ld (wildcards+2),a
+	ld a,255		;store do
+	ld (wildcards+1),a
+	ld a,(sentence+1)
+	cp 255			;was do blank?
+	jp z,$n?
+	ld a,ANY_OBJECT ;no, store '*'
+	ld (wildcards+1),a
+$n?	nop ; repeat for io
+	ld a,255		;store io
+	ld (wildcards+3),a
+	ld (sentence+3),a
+	cp 255			;was do blank?
+	jp z,$o?
+	ld a,ANY_OBJECT ;no, store '*'
+	ld (wildcards+3),a
+$o?	ret
+	
+wildcards DB 0,0,0,0
