@@ -260,10 +260,15 @@ namespace XMLto6809
                     {
                         WriteSetVar(sw, statement);
                     }
-                    else if (XmlToTables.GetInstance().IsSubroutine(statement))
+                    else if (statement.IndexOf("call") == 0)
                     {
-                        string subName = statement.Substring(0, statement.IndexOf("("));
-                        WriteSubroutineCall(sw, subName);
+                        statement = statement.Substring(4).Trim(); //chop off "call"
+                        if (XmlToTables.GetInstance().IsSubroutine(statement))
+                        {
+                            string subName = statement.Substring(0, statement.IndexOf("("));
+                            WriteSubroutineCall(sw, subName);
+                        }
+                        else throw new Exception("Invalid subroutine name near " + statement);
                     }
                     else if (statement.IndexOf(".") != -1)
                     { //attribute or property assignment
@@ -296,7 +301,13 @@ namespace XMLto6809
                     }//end attr or prop assignment (dot found)
                     else
                     {//var assignment not using set()
-                        //WriteAttrAssignment(statement, );
+//                        throw new Exception("Need to Implement var setting");
+//                      WriteAttrAssignment(statement, obj, right);
+                        sw.WriteLine("\tnop ; this code hasn't been tested.");
+                        string right = statement.Substring(statement.IndexOf("=") + 1, statement.Length - statement.IndexOf("=") - 1).Trim();
+                        string left = statement.Substring(0, statement.IndexOf("=")).Trim();
+                        WriteAttrAssignment(sw, left, right);
+
                     }
                     string remainder = code.Substring(code.IndexOf(";") + 1).Trim();
                     WriteCode(remainder, sw);
@@ -387,7 +398,7 @@ namespace XMLto6809
             }
             else
             {
-                return project.IsVar(name);
+                 return project.IsVar(name);
             }
         }
 

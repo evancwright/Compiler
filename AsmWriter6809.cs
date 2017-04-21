@@ -357,7 +357,7 @@ namespace XMLto6809
             sw.WriteLine("\tpshs a");
             sw.WriteLine("\tlda " + varName);
             sw.WriteLine("\tpshu a ; push var value");
-            sw.WriteLine("\tlda #" + val + " ; push val to add");
+            sw.WriteLine("\tlda #" + val.Trim() + " ; push val to add");
             sw.WriteLine("\tadda ,u ; add it ");
             sw.WriteLine("\tsta " + varName + " ; store it back");
             sw.WriteLine("\tpulu a ; remove temp");

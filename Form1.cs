@@ -49,6 +49,7 @@ namespace XMLto6809
             Application.Exit();
         }
 
+        //build CoCo version
         private void buildToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (!Directory.Exists(workingDirectory))
@@ -57,8 +58,8 @@ namespace XMLto6809
             }
 
             XmlToTables converter = XmlToTables.GetInstance();
-            string oldDir = Environment.CurrentDirectory;
-            Environment.CurrentDirectory = workingDirectory;
+            //string oldDir = Environment.CurrentDirectory;
+            //Environment.CurrentDirectory = workingDirectory;
 
             OpenFileDialog ofd = new OpenFileDialog();
 
@@ -68,11 +69,13 @@ namespace XMLto6809
             {
                 string fileName = ofd.FileName;
                 converter.Convert6809(fileName);  //"f3xml.xml"
-            
             }
 
-            Environment.CurrentDirectory = oldDir;
-            RunBuild();
+
+            MessageBox.Show("Export complete.  Open the directory " + converter.buildDir + " in Cygwin and run: build.sh");
+
+           // Environment.CurrentDirectory = oldDir;
+           // RunBuild();
 
         }
 
@@ -80,7 +83,7 @@ namespace XMLto6809
         void RunBuild()
         {
             //does the output directory exist?
-
+            /*
             string oldDirectory = Environment.CurrentDirectory;
             Environment.CurrentDirectory = workingDirectory;
 
@@ -109,25 +112,20 @@ namespace XMLto6809
               p.WaitForExit();
       
               MessageBox.Show("Done.");                  
-              Environment.CurrentDirectory = oldDirectory;
+              
+             Environment.CurrentDirectory = oldDirectory;
+             */
         }
 
         private void setupHelpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start("notepad.exe", "setup.txt");
+           // Process.Start("notepad.exe", "setup.txt");
         }
 
         private void tRS80ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!Directory.Exists(trs80workingDirectory))
-            {
-                Directory.CreateDirectory(trs80workingDirectory);
-            }
-
+ 
             XmlToTables converter = XmlToTables.GetInstance();
-            string oldDir = Environment.CurrentDirectory;
-            Environment.CurrentDirectory = trs80workingDirectory;
-
             OpenFileDialog ofd = new OpenFileDialog();
 
             ofd.Filter = "*xml files (*.xml)|*.xml";
@@ -138,6 +136,13 @@ namespace XMLto6809
                 converter.ConvertZ80(fileName);  //"f3xml.xml"
             }
 
+            MessageBox.Show("Export complete.  Open the directory " + converter.buildDir + " in Cygwin and run: Z80asm main.asm");
+
+        }
+
+        private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("By Evan Wright, 2017");
         }
 
        

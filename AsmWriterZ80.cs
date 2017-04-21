@@ -152,11 +152,12 @@ namespace XMLto6809
             if (val==0)
             {//clear bit ('or' x with mask)
                 WriteObjectAddrToIX(sw, obj, propName);
-                sw.WriteLine("\tld b,(ix) ; get property byte");
-                sw.WriteLine("\tld a," +  propBits[propName]+ " ; get " + propName + " bit");
-                sw.WriteLine("\tcpl ; flip bits");
-                sw.WriteLine("\tand b ; clear the bit" );
-                sw.WriteLine("\tld (ix),a ; write bits back ");
+                sw.WriteLine("\tres " + GetBitPos(propName) + ",(ix) ; clr " + propName + " bit");
+                //sw.WriteLine("\tld b,(ix) ; get property byte");
+                //sw.WriteLine("\tld a," +  propBits[propName]+ " ; get " + propName + " bit");
+                //sw.WriteLine("\tcpl ; flip bits");
+               // sw.WriteLine("\tand b ; clear the bit" );
+                //sw.WriteLine("\tld (ix),a ; write bits back ");
             }
             else
             {//set bit (or mask with value)
@@ -183,12 +184,22 @@ namespace XMLto6809
 
             WriteObjectAddrToIX(sw, objName, propName);
             sw.WriteLine("\tbit " + GetBitPos(propName) + ",(ix) ; test " + propName + " prop bit");
-            WriteFlagsToA(sw);
-            for (int i=0;i < GetBitPos(propName);i++) 
-                sw.WriteLine("\tsrl a ; right justify z bit");
-            sw.WriteLine("\tld b," + val);
-            sw.WriteLine("\tcp b ; == " + val + " ?");
-            sw.WriteLine("\tjp " + OperatorToCC(op) +"," + label);
+
+            if (op.Equals("=="))
+            {
+                if (val == 0)
+                    sw.WriteLine("\tjp nz," + label);
+                else
+                    sw.WriteLine("\tjp z," + label);
+            }
+            else if (op.Equals("!="))
+            {
+                if (val == 0)
+                    sw.WriteLine("\tjp z," + label);
+                else
+                    sw.WriteLine("\tjp nz," + label);
+            }
+            else throw new Exception("Attributes can only be test with == and !=");
 
         }
 

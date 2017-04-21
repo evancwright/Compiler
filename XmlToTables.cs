@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.IO;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 
 namespace XMLto6809
 {
     class XmlToTables
     {
-               protected XmlDocument doc;
+        protected XmlDocument doc;
         protected Table nameTable = new Table();
         protected Table nogoTable = new Table();
         protected Table descriptionTable = new Table();
@@ -22,6 +23,10 @@ namespace XMLto6809
         protected List<String> routineNames = new List<String>();
         protected Dictionary<string, string> varTable = new Dictionary<string, string>(); //variables
         protected List<UserVar> userVars = new List<UserVar>();
+        static protected Dictionary<string,string> skelDirs = new Dictionary<string,string>();
+
+        const string Trs80SkelDir = "trs80Skel";
+        public string buildDir;
 
         //Table strings = new Table(); //for events
 
@@ -32,6 +37,7 @@ namespace XMLto6809
                                "PORTABLE_MASK", "BACKDROP_MASK", "DRINKABLE_MASK", "FLAMMABLE_MASK", 
                                "LIGHTABLE_MASK", "EMITTING_LIGHT_MASK","DOOR_MASK", "UNUSED_MASK" 
                            };
+
 
         protected string[] preps = new string[]
         {            	
@@ -62,10 +68,17 @@ namespace XMLto6809
 
         }
 
-        protected void CreateTables(string fileName)
+        static XmlToTables()
+        {
+            skelDirs["_Z80"] = "trs80Skel";
+            skelDirs["_6809"] = "6809Skel";
+        }
+
+        protected void CreateTables(string fileName, string tgtPlatform)
         {
             doc = new XmlDocument();
             doc.Load(fileName);
+            CreateOutputDir(tgtPlatform);
             descriptionTable.Clear();
             descriptionTable.AddEntry("YOU NOTICE NOTHING UNEXPECTED.");
             PopulateNameTable(doc);
@@ -299,10 +312,10 @@ namespace XMLto6809
 
         public void Convert6809(string fileName)
         {
-            
+            string oldDir = Environment.CurrentDirectory;
 
             //get the file path 
-            CreateTables(fileName);
+            CreateTables(fileName, "_6809");
 
             WriteWelcomeMessage("Welcome6809.asm", ".strz", "");
             WriteStringTable6809("DescriptionTable6809.asm", "description_table", descriptionTable);
@@ -319,15 +332,16 @@ namespace XMLto6809
             WriteEvents(doc, "6809", new AsmWriter6809());
             WriteUserVarTable(doc, "6809");
             WriteBackdropTable(doc, "BackDropTable6809.asm",".db");
+
+            Environment.CurrentDirectory = oldDir;
         }
 
 
         public void ConvertZ80(string fileName)
         {
 
-
             //get the file path 
-            CreateTables(fileName);
+            CreateTables(fileName, "_Z80");
 
             WriteWelcomeMessage("WelcomeZ80.asm", "DB", ",0h");
             WriteStringTableZ80("StringTableZ80.asm", "string_table", descriptionTable);
@@ -863,8 +877,9 @@ namespace XMLto6809
 
                 foreach (XmlNode s in subs)
                 {
+                    string tp = s.Attributes.GetNamedItem("type").Value;
 
-                    if (s.Attributes.GetNamedItem("type").Value == type)
+                    if (tp.Equals(type))
                     {
                         string verb = s.Attributes.GetNamedItem("verb").Value;
                         int verbId = GetVerbId(verb);
@@ -916,12 +931,23 @@ namespace XMLto6809
                 foreach (XmlNode c in checks)
                 {
                     string verb = c.Attributes.GetNamedItem("verb").Value;
-                    int verbId = GetVerbId(verb);
-                    string subName = c.Attributes.GetNamedItem("check").Value;
-                    sw.WriteLine("\t" +byteSep + " " + verbId + " ; " + verb);
-                    sw.WriteLine("\t" + wordSep + " " + subName);
-                }
+                    
 
+                    if (verb.IndexOf(",")!=-1)
+                    {//if there are synonyms, get 1st
+                        verb = verb.Substring(0, verb.IndexOf(","));
+                    }
+                    
+                    int verbId = GetVerbId(verb);
+
+                    if (verbId != -1)
+                    {
+                        string subName = c.Attributes.GetNamedItem("check").Value;
+                        sw.WriteLine("\t" + byteSep + " " + verbId + " ; " + verb);
+                        sw.WriteLine("\t" + wordSep + " " + subName);
+                    }
+                    else throw new Exception("Exception while writing check table. Unknown verb: " + verb);
+                }
                 sw.WriteLine("\t" + byteSep + " 255");
             }
         }
@@ -998,7 +1024,7 @@ namespace XMLto6809
                 sw.WriteLine("");
                 string delim = "DB";
 
-                if (processor.Equals(6809))
+                if (processor.Equals("6809"))
                     delim = ".db";
 
                 foreach (UserVar v in userVars)
@@ -1027,7 +1053,7 @@ namespace XMLto6809
 
                     if (o.IsBackdrop())
                     {
-                        sw.Write("\t.db " + o.id );
+                        sw.Write("\t" +  byteSep + " " + o.id );
 
                         for (int j=0; j < o.backdropRooms.Length; j++)
                         {
@@ -1052,5 +1078,35 @@ namespace XMLto6809
             }
         }
 
+
+        void CreateOutputDir(string tgtPlatform)
+        {
+            XmlNodeList list = doc.SelectNodes("//project/projname");            
+            
+            if (list.Count == 0)
+            {
+                MessageBox.Show("Project XML does not have a name element!");
+                Application.Exit();
+            }
+
+            string workingDirectory = list[0].InnerText + tgtPlatform;
+            
+
+            if (!Directory.Exists(workingDirectory))
+            {
+                Directory.CreateDirectory(workingDirectory);
+            }
+
+            Environment.CurrentDirectory = workingDirectory;
+            buildDir = Environment.CurrentDirectory;
+            //copy skeleton into working directory
+
+            string skelDir = skelDirs[tgtPlatform];
+            string cmd = "COPY /Y ..\\" + skelDir + "\\*.*  .";
+            Process p = Process.Start("cmd", "/c "+cmd);
+            p.WaitForExit();
+
+            //run the build
+        }
     }//end class
 }
