@@ -136,7 +136,7 @@ check_dobj_closed
 		ld b,a	
 		ld c,OPEN
 		call get_obj_prop
-		cp 1
+		cp 0
 		jp z,$x?
 		ld hl,alreadyopen
 		call OUTLIN

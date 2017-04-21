@@ -30,11 +30,9 @@ $d?		nop;
 		ld a,(action_run)
 		cp 1
 		call nz,run_default_sentence
-		;run actions
+		;run 'after' actions
 		ld ix,postactions_table
 		call run_actions
-		;run after
-		;do events
 		ret
 
 ;actions table in ix
