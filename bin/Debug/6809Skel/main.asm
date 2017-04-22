@@ -107,6 +107,7 @@ last_char .db 0
 table_index .db 0
 user_stack_save .dw 0x0000
 sys_stack_save .dw 0x0000
+gameOver .db 0
 
 	include Welcome6809.asm
 	

@@ -253,5 +253,116 @@ check_not_self_or_child
 	jsr PRINTCR
 @x 	puls y,x,d
 	rts
+
+;check_dobj_portable
+;	pshs d,x,y
+;	nop	; can the player see it
+;	nop	; is the object portable
+;	lda sentence+1
+;	ldb #OBJ_ENTRY_SIZE
+;	mul
+;	tfr d,x
+;	leax obj_table,x 
+;	lda PROPERTY_BYTE_2,x
+;	anda #PORTABLE_MASK
+;	cmpa #PORTABLE_MASK
+;	beq @y
+;	lda #0
+;	ldx #impossible
+;	jsr PRINT
+;	jsr PRINTCR
+;	bra @x
+;@;y  lda #1
+;@x; 	sta ,u
+;	puls y,x,d
+	rts
+
+check_dobj_portable
+	pshs d,x,y
+	lda sentence+1
+	pshu a
+	lda #PROPERTY_BYTE_2
+	pshu a
+	jsr get_object_attribute
+	pulu a 	
+	anda #PORTABLE_MASK
+	cmpa #0
+	bne @y
+	ldx #notportable
+	jsr PRINT
+	jsr PRINTCR	
+	lda #0
+	bra @x
+@y	lda #1
+@x	pshu a
+	puls y,x,d
+	rts
+
+check_dobj_opnable
+	pshs d,x,y
+	lda sentence+1
+	pshu a
+	lda #PROPERTY_BYTE_1
+	pshu a
+	jsr get_object_attribute
+	pulu a 	
+	anda #OPENABLE_MASK
+	cmpa #0
+	bne @y
+	ldx #notopenable
+	jsr PRINT
+	jsr PRINTCR	
+	lda #0
+	bra @x
+@y	lda #1
+@x	pshu a
+	puls y,x,d
+	rts
+	
+check_dobj_closed
+	pshs d,x,y
+	lda sentence+1
+	pshu a
+	lda #PROPERTY_BYTE_1
+	pshu a
+	jsr get_object_attribute
+	pulu a 	
+	anda #OPEN_MASK
+	cmpa #0
+	beq @y
+	ldx #alreadyopen
+	jsr PRINT
+	jsr PRINTCR	
+	lda #0
+	bra @x
+@y	lda #1
+@x	pshu a
+	puls y,x,d
+	rts
+
+check_dobj_open
+	pshs d,x,y
+	lda sentence+1
+	pshu a
+	lda #PROPERTY_BYTE_1
+	pshu a
+	jsr get_object_attribute
+	pulu a 	
+	anda #OPEN_MASK
+	cmpa #0
+	bne @y
+	ldx #the
+	jsr PRINT
+	ldx #word2 ; "d.o."
+	jsr PRINT
+	ldx #isclosed
+	jsr PRINT
+	jsr PRINTCR	
+	lda #0
+	bra @x
+@y	lda #1
+@x	pshu a
+	puls y,x,d
+	rts
 	
 impossible .strz "THAT'S PHYSICALLY IMPOSSIBLE."	

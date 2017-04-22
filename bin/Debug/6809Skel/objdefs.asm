@@ -48,10 +48,25 @@ OUT equ 15
 MASS equ 16
 
 
-;OBJ_ENTRY_SIZE equ 18
-;PROPERTY_BYTE_1 equ 16
-;PROPERTY_BYTE_2 equ 17
-
 OBJ_ENTRY_SIZE equ 19
 PROPERTY_BYTE_1 equ 17
 PROPERTY_BYTE_2 equ 18
+
+; byte 1 (PROPERTY_BYTE_1)
+;mask_table
+;	.db SCENERY_MASK ;equ 1 
+;	.db SUPPORTER_MASK ;equ 2
+;	.db CONTAINER_MASK ;equ 4
+;	.db TRANSPARENT_MASK ;equ 8
+;	.db OPENABLE_MASK ;equ 16	
+;	.db OPEN_MASK ;equ 32
+;	.db LOCKABLE_MASK ;equ 64
+;	.db LOCKED_MASK ;equ 128
+;	.db PORTABLE_MASK ;equ 1
+;	.db BACKDROP_MASK ;equ 2
+;	.db DRINKABLE_MASK ;equ 4
+;	.db FLAMMABLE_MASK ;equ 8
+;	.db LIGHTABLE_MASK ;equ 16
+;	.db LIT_MASK ;equ 32	
+;	.db DOOR_MASK ;equ 64
+;	.db UNUSED_MASK ;equ 128

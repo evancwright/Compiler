@@ -40,7 +40,14 @@ print_ret_not_portable
 	jsr PRINTCR
 	puls y,x,d
 	rts
+ 		
 	
+print_ret_no_see
+	ldx #badobj
+	jsr PRINT
+	jsr PRINTCR
+	puls y,x,d
+	rts	
  
 print_ret_already_open
 	ldx #alreadyopen
